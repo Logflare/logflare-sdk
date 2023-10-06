@@ -1,6 +1,6 @@
 {
   "name": "logflare-js",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "description": "Logflare JS SDK",
   "scripts": {
     "dev": "vite",
