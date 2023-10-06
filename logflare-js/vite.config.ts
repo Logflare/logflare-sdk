@@ -1,9 +1,13 @@
-// vite.config.js
+/// <reference types="vitest" />
+
 import { resolve } from "path";
 import { defineConfig } from "vite";
 
 import dts from "vite-plugin-dts";
 export default defineConfig({
+  test: {
+    setupFiles: ["test/setup.ts"]
+  },
   build: {
     emptyOutDir: true,
     lib: {
@@ -27,6 +31,7 @@ export default defineConfig({
     //   },
     // },
   },
+  
   plugins: [
     dts({
       insertTypesEntry: true,

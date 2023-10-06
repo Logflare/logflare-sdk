@@ -1,6 +1,9 @@
-interface Options {
+export interface ClientOptions {
+  // uuid identifier for source
   sourceToken: string;
+  // api key retrieved from service
   apiKey: string;
+  // configurable url for the logflare endpoint
   apiUrl?: string;
   // onError is an optional callback function to handle any errors returned by logflare
   onError?: (
@@ -23,13 +26,13 @@ class NetworkError extends Error {
   }
 }
 
-export class LogflareHttpClient {
+export class LogflareJs {
   protected readonly sourceToken: string;
   protected readonly apiKey: string;
   protected readonly apiUrl: string = "https://api.logflare.app";
-  protected readonly onError: Options["onError"]
+  protected readonly onError: ClientOptions["onError"];
 
-  public constructor(options: Options) {
+  public constructor(options: ClientOptions) {
     const { sourceToken, apiKey } = options;
     if (!sourceToken) {
       throw "Logflare API source token is NOT configured!";
@@ -50,7 +53,9 @@ export class LogflareHttpClient {
     return this.sendEvents([event]);
   }
 
-  public async sendEvents(batch: object[]) {
+  public async sendEvents(
+    batch: object[]
+  ): Promise<{ message: string } | unknown | Error> {
     const path = `/api/logs?api_key=${this.apiKey}&source=${this.sourceToken}`;
     const payload = { batch };
     try {
@@ -94,3 +99,5 @@ export class LogflareHttpClient {
     }
   }
 }
+
+export default LogflareJs;

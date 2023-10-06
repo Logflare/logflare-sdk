@@ -24,16 +24,7 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-    # Build package
       - name: Install deps
         run: npm ci
       - name: Build
-        run: npm run build
-
-    # run e2e test
-      - name: Install e2e deps
-        run: npm run ci
-        working-directory: apps/logflare_js/test/e2e
-      - name: Run e2e tests
-        run: npm test
-        working-directory: apps/logflare_js/test/e2e
+        run: npm run test
