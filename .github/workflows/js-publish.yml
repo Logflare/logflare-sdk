@@ -3,6 +3,11 @@ name: Publish to npm registry (manual)
 on:
   workflow_dispatch:
 
+defaults:
+  run:
+    working-directory: ./logflare-js
+
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -15,12 +20,12 @@ jobs:
           registry-url: "https://registry.npmjs.org"
       - run: git config --global user.email "github-action@users.noreply.github.com"
       - run: git config --global user.name "GitHub Action"
-      - run: yarn
-      - run: yarn test
-      - run: yarn build
+      - run: npm ci
+      - run: npm run test
+      - run: npm run build
       - run: npm pack --dry-run
       - name: Publish production package to npm
-        run: yarn publish --access public --tag latest --new-version $(npm run --silent vsn)
+        run: npm publish --access public --tag latest
         env:
           CI: true
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
