@@ -17,7 +17,6 @@ import Config
 #       metadata: [:user_id]
 #
 
-
 config :logflare_ex, api_url: "https://api.logflare.app", api_key: "some-key"
 
 import_config "#{Mix.env()}.exs"

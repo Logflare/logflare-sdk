@@ -4,11 +4,11 @@ defmodule LogflareEx.MixProject do
   def project do
     [
       app: :logflare_ex,
-      version: "0.1.0",
-      build_path: "../../_build",
-      config_path: "../../config/config.exs",
-      deps_path: "../../deps",
-      lockfile: "../../mix.lock",
+      version: "0.0.0",
+      build_path: "./_build",
+      config_path: "./config/config.exs",
+      deps_path: "./deps",
+      lockfile: "./mix.lock",
       elixir: "~> 1.12",
       start_permanent: Mix.env() == :prod,
       deps: deps()
@@ -26,14 +26,15 @@ defmodule LogflareEx.MixProject do
   defp deps do
     [
       {:tesla, "~> 1.0"},
-      {:jason, ">= 1.0.0"},
       {:finch, "~> 0.10"},
       {:bertex, "~> 1.3"},
+      {:jason, ">= 1.0.0"},
       {:bypass, "~> 2.1", only: :test},
-
-    {:benchee, "~> 1.0", only: [:dev, :test], runtime: false},
+      {:benchee, "~> 1.0", only: [:dev, :test], runtime: false},
       {:mix_test_watch, "~> 1.0", only: :dev, runtime: false},
-      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
+      {:mimic, "~> 1.7", only: :test},
+      {:typed_struct, "~> 0.3.0"}
     ]
   end
 end
