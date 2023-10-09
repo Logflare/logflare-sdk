@@ -3,9 +3,9 @@ name: Elixir Unit Tests
 on:
   workflow_dispatch:
   pull_request:
-    branches: [staging]
+    branches: [main]
     paths:
-      - logflare-ex
+      - logflare-js/**
 
 defaults:
   run:
