@@ -16,7 +16,8 @@ defmodule LogflareEx.MixProject do
       preferred_cli_env: [
         "test.format": :test,
         "test.compile": :test
-      ]
+      ],
+      package: package()
     ]
   end
 
@@ -49,4 +50,14 @@ defmodule LogflareEx.MixProject do
       "test.format": ["format --check-formatted"]
     ]
   end
+
+  defp package() do
+    [
+      description: "Logflare Elixir SDK",
+      organization: "logflare",
+      licenses: ["MIT"],
+      links: %{"GitHub" => "https://github.com/Logflare/logflare-sdk"}
+    ]
+  end
+
 end
