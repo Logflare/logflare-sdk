@@ -70,4 +70,4 @@ jobs:
           key: mix-${{ hashFiles('**/mix.lock') }}
           restore-keys: mix
       - run: mix deps.get
-      - run: mix test.formatting
+      - run: mix test.format
