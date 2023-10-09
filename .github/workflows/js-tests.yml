@@ -1,4 +1,4 @@
-name: JS Unit Tests
+name: JS CI
 
 on:
   workflow_dispatch:
@@ -7,19 +7,16 @@ on:
     paths:
       - logflare-js/**
 
-
-
 defaults:
   run:
-    working-directory: apps/logflare_js/priv
-
+    working-directory: logflare-js
 
 jobs:
-  build:
+  unit_tests:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [16.x, 18.x]
+        node-version: [16.x, 18.x, 20.x]
 
     steps:
       - uses: actions/checkout@v2
@@ -27,7 +24,38 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
+      - name: Restore caches
+        uses: actions/cache/restore@v3
+        with:
+          path: |
+            logflare-js/node_modules
+          key: ${{ runner.os }}-${{matrix.node-version }}-npm
+      - run: npm ci
+      # use experiemntal node option for 16.x
+      - run: NODE_OPTIONS=--experimental-fetch npm run test
+        if: matrix.node-version == '16.x'
+      - run: npm run test
+        if: matrix.node-version != '16.x'
+        
+  build_check:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16.x, 18.x, 20.x]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup node ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Restore caches
+        uses: actions/cache/restore@v3
+        with:
+          path: |
+            logflare-js/node_modules
+          key: ${{ runner.os }}-${{matrix.node-version }}-npm
       - name: Install deps
         run: npm ci
       - name: Build
-        run: npm run test
+        run: npm run build

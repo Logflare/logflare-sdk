@@ -1,5 +1,5 @@
 {
-  "name": "logflare-js",
+  "name": "@logflare/logflare-js",
   "version": "0.1.0",
   "description": "Logflare JS SDK",
   "scripts": {
