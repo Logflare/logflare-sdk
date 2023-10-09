@@ -9,7 +9,7 @@ on:
 
 defaults:
   run:
-    working-directory: apps/logflare_js/priv
+    working-directory: logflare-js
 
 jobs:
   unit_tests:
