@@ -1,4 +1,4 @@
-name: Elixir Unit Tests
+name: Elixir CI
 
 on:
   workflow_dispatch:
@@ -26,14 +26,14 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            deps
-          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
-          restore-keys: ${{ runner.os }}-mix
+            logflare-ex/deps
+          key: mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: mix
       - run: mix deps.get
       - run: mix test
 
   compile_check:
-    name: Unit tests
+    name: Compilation warnings
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -46,14 +46,14 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            deps
-          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
-          restore-keys: ${{ runner.os }}-mix
+            logflare-ex/deps
+          key: mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: mix
       - run: mix deps.get
       - run: mix test.compile
 
   formatting:
-    name: Unit tests
+    name: Formatting
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -66,8 +66,8 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            deps
-          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
-          restore-keys: ${{ runner.os }}-mix
+            logflare-ex/deps
+          key: mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: mix
       - run: mix deps.get
       - run: mix test.formatting
