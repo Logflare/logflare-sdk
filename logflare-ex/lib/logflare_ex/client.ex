@@ -1,6 +1,6 @@
 defmodule LogflareEx.Client do
   @moduledoc false
-  @default_tesla_adapter  {Tesla.Adapter.Finch, name: LogflareEx.Finch, receive_timeout: 30_000}
+  @default_tesla_adapter {Tesla.Adapter.Finch, name: LogflareEx.Finch, receive_timeout: 30_000}
   use TypedStruct
 
   typedstruct do
