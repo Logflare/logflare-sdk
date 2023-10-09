@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [16.x, 18.x]
+        node-version: [16.x, 18.x, 20.x]
 
     steps:
       - uses: actions/checkout@v2
@@ -30,10 +30,12 @@ jobs:
           path: |
             logflare-js/node_modules
           key: ${{ runner.os }}-${{matrix.node-version }}-npm
-      - name: Install deps
-        run: npm ci
-      - name: Build
-        run: npm run test
+      - run: npm ci
+      # use experiemntal node option for 16.x
+      - run: NODE_OPTIONS=--experimental-fetch npm run test
+        if: matrix.node-version == '16.x'
+      - run: npm run test
+        if: matrix.node-version != '16.x'
         
   build_check:
     runs-on: ubuntu-latest
