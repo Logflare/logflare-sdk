@@ -11,7 +11,12 @@ defmodule LogflareEx.MixProject do
       lockfile: "./mix.lock",
       elixir: "~> 1.12",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      aliases: aliases(),
+      preferred_cli_env: [
+        "test.format": :test,
+        "test.compile": :test
+      ]
     ]
   end
 
@@ -35,6 +40,13 @@ defmodule LogflareEx.MixProject do
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:mimic, "~> 1.7", only: :test},
       {:typed_struct, "~> 0.3.0"}
+    ]
+  end
+
+  defp aliases do
+    [
+      "test.compile": ["compile --warnings-as-errors"],
+      "test.format": ["format --check-formatted"]
     ]
   end
 end
