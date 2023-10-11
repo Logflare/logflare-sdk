@@ -59,5 +59,4 @@ defmodule LogflareEx.MixProject do
       links: %{"GitHub" => "https://github.com/Logflare/logflare-sdk"}
     ]
   end
-
 end
