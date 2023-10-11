@@ -4,7 +4,7 @@ defmodule LogflareEx.MixProject do
   def project do
     [
       app: :logflare_ex,
-      version: "0.0.0",
+      version: System.get_env("MIX_PROJECT_VERSION", "0.1.0"),
       build_path: "./_build",
       config_path: "./config/config.exs",
       deps_path: "./deps",
@@ -54,7 +54,6 @@ defmodule LogflareEx.MixProject do
   defp package() do
     [
       description: "Logflare Elixir SDK",
-      organization: "logflare",
       licenses: ["MIT"],
       links: %{"GitHub" => "https://github.com/Logflare/logflare-sdk"}
     ]
