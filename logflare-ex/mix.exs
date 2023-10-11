@@ -1,10 +1,12 @@
 defmodule LogflareEx.MixProject do
   use Mix.Project
 
+  @prerelease System.get_env("PRERELEASE_VERSION")
+  @version_suffix if(@prerelease, do: "-#{@prerelease}", else: "")
   def project do
     [
       app: :logflare_ex,
-      version: System.get_env("MIX_PROJECT_VERSION", "0.1.0"),
+      version: "0.1.0#{@version_suffix}",
       build_path: "./_build",
       config_path: "./config/config.exs",
       deps_path: "./deps",
