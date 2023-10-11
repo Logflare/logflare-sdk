@@ -1,6 +1,9 @@
 name: Publish dev package
 
 on:
+  release:
+    types: [published]
+
   push:
     branches:
       - main
@@ -12,7 +15,7 @@ defaults:
     working-directory: ./logflare-ex
 
 jobs:
-  publish_dev:
+  publish:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -28,6 +31,13 @@ jobs:
           key: mix-${{ hashFiles('**/mix.lock') }}
           restore-keys: mix
       - run: mix deps.get
+      - run: echo "short_sha=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
       - run: mix hex.publish --yes
+        if: github.event_name != 'release'
+        env:
+          HEX_API_KEY: ${{ secrets.HEX_AUTH_TOKEN }}
+          MIX_PROJECT_VERSION: dev-${{ env.short_sha }}
+      - run: mix hex.publish --yes
+        if: github.event_name == 'release'
         env:
           HEX_API_KEY: ${{ secrets.HEX_AUTH_TOKEN }}
