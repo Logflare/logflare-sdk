@@ -1,4 +1,4 @@
-name: Publish dev package
+name: Publish JS dev package
 
 on:
   push:
