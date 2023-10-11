@@ -12,7 +12,10 @@ defaults:
     working-directory: ./logflare-ex
 
 jobs:
-  unit_tests:
+  check:
+    strategy:
+      matrix:
+        cmd: [test, test.format, test.compile, test.build]
     name: Unit tests
     runs-on: ubuntu-latest
     steps:
@@ -30,44 +33,5 @@ jobs:
           key: mix-${{ hashFiles('**/mix.lock') }}
           restore-keys: mix
       - run: mix deps.get
-      - run: mix test
+      - run: mix ${{ matrix.cmd }}
 
-  compile_check:
-    name: Compilation warnings
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up Elixir
-        uses: erlef/setup-beam@v1
-        with:
-          version-file: .tool-versions
-          version-type: strict
-      - name: Restore dependencies cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            logflare-ex/deps
-          key: mix-${{ hashFiles('**/mix.lock') }}
-          restore-keys: mix
-      - run: mix deps.get
-      - run: mix test.compile
-
-  formatting:
-    name: Formatting
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up Elixir
-        uses: erlef/setup-beam@v1
-        with:
-          version-file: .tool-versions
-          version-type: strict
-      - name: Restore dependencies cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            logflare-ex/deps
-          key: mix-${{ hashFiles('**/mix.lock') }}
-          restore-keys: mix
-      - run: mix deps.get
-      - run: mix test.format

@@ -47,7 +47,8 @@ defmodule LogflareEx.MixProject do
   defp aliases do
     [
       "test.compile": ["compile --warnings-as-errors"],
-      "test.format": ["format --check-formatted"]
+      "test.format": ["format --check-formatted"],
+      "test.build": ["hex.build"]
     ]
   end
 
