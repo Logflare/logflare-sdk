@@ -53,8 +53,18 @@ defmodule LogflareEx do
     body = Bertex.encode(%{"batch" => batch, "source" => client.source_token})
 
     case Tesla.post(client.tesla_client, "/api/logs", body) do
-      %Tesla.Env{status: 201, body: body} -> {:ok, Jason.decode!(body)}
-      %Tesla.Env{} = result -> {:error, result}
+      %Tesla.Env{status: 201, body: body} ->
+        {:ok, Jason.decode!(body)}
+
+      %Tesla.Env{} = result ->
+        # on_error callback
+        case Map.get(client, :on_error) do
+          {m, f, 1} -> apply(m, f, [result])
+          cb when is_function(cb) -> cb.(result)
+          _ -> :noop
+        end
+
+        {:error, result}
     end
   end
 end
