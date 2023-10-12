@@ -38,6 +38,26 @@ defmodule LogflareExTest do
              LogflareEx.client(api_key: "123") |> LogflareEx.send_events([%{some: "event"}])
   end
 
+  describe "on_error" do
+    test "triggers on_error mfa if non-201 status is encountered" do
+      Tesla
+      |> expect(:post, 2, fn _client, _path, _body ->
+        %Tesla.Env{status: 500, body: "some server error"}
+      end)
+
+      LogflareEx.TestUtils
+      |> expect(:stub_function, 2, fn %{status: 500} -> :ok end)
+
+      for cb <- [
+            {LogflareEx.TestUtils, :stub_function, 1},
+            &LogflareEx.TestUtils.stub_function/1
+          ] do
+        client = LogflareEx.client(api_key: "123", source_token: "123", on_error: cb)
+        assert {:error, %Tesla.Env{}} = LogflareEx.send_events(client, [%{some: "event"}])
+      end
+    end
+  end
+
   @tag :benchmark
   # Bertex is way faster
   test "benchmark Jason vs Bertex" do

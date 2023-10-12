@@ -10,6 +10,7 @@ defmodule LogflareEx.Client do
     field(:api_key, String.t(), enforce: true)
     field(:api_url, String.t(), default: "https://api.logflare.app")
     field(:source_token, String.t())
+    field(:on_error, list() | mfa(), default: nil)
   end
 
   @typep opts :: [api_key: String.t(), api_url: String.t(), tesla_client: Tesla.Client.t()]
@@ -21,7 +22,8 @@ defmodule LogflareEx.Client do
         api_key: get_config_value(:api_key),
         adapter: get_config_value(:adapter) || @default_tesla_adapter,
         source_token: get_config_value(:source_token),
-        tesla_client: nil
+        tesla_client: nil,
+        on_error: get_config_value(:on_error)
       })
 
     tesla_client =
@@ -53,7 +55,7 @@ defmodule LogflareEx.Client do
     Tesla.client(middlewares, adapter)
   end
 
-  defp get_config_value(key) do
+  def get_config_value(key) do
     Application.get_env(:logflare_ex, key)
   end
 end
