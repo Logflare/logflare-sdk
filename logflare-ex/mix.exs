@@ -31,7 +31,8 @@ defmodule LogflareEx.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger]
+      extra_applications: [:logger],
+      mod: {LogflareEx.Application, []}
     ]
   end
 
@@ -47,7 +48,10 @@ defmodule LogflareEx.MixProject do
       {:mix_test_watch, "~> 1.0", only: :dev, runtime: false},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:mimic, "~> 1.7", only: :test},
-      {:typed_struct, "~> 0.3.0"}
+      {:typed_struct, "~> 0.3.0"},
+      {:logflare_etso, "~> 1.1.2"},
+      {:ex_machina, "~> 2.7.0", only: :test},
+      {:typed_ecto_schema, "~> 0.4.1", runtime: false}
     ]
   end
 

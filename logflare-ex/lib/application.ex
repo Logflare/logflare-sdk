@@ -1,15 +1,12 @@
 defmodule LogflareEx.Application do
-  # See https://hexdocs.pm/elixir/Application.html
-  # for more information on OTP Applications
   @moduledoc false
-
   use Application
 
   @impl true
   def start(_type, _args) do
     children = [
-      # Starts a worker by calling: LogflareApiClient.Worker.start_link(arg)
-      # {LogflareApiClient.Worker, arg}
+      LogflareEx.Repo,
+      {PartitionSupervisor, child_spec: LogflareEx.Batcher, name: LogflareEx.BatcherSup},
       {Finch, name: LogflareEx.Finch}
     ]
 
