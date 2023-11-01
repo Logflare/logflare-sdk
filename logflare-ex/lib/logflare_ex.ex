@@ -1,5 +1,9 @@
 defmodule LogflareEx do
   alias LogflareEx.Client
+  alias LogflareEx.Batcher
+  alias LogflareEx.BatchedEvent
+  alias LogflareEx.Repo
+  alias LogflareEx.BatcherSup
 
   @moduledoc """
   Documentation for `LogflareEx`.
@@ -66,5 +70,29 @@ defmodule LogflareEx do
 
         {:error, result}
     end
+  end
+
+  @spec send_batched_events(Client.t(), [map()]) :: :ok
+  def send_batched_event(client, %{} = event), do: send_batched_events(client, [event])
+
+  @spec send_batched_events(Client.t(), [map()]) :: :ok
+  def send_batched_events(_client, []), do: :ok
+
+  def send_batched_events(client, events) when is_list(events) do
+    BatcherSup.ensure_started(client)
+
+    for event <- events do
+      client
+      |> Map.take([:source_token, :source_name])
+      |> Map.put(:body, event)
+      |> Batcher.create_event()
+    end
+
+    :ok
+  end
+
+  def count_queued_events() do
+    Repo.all(BatchedEvent)
+    |> length()
   end
 end

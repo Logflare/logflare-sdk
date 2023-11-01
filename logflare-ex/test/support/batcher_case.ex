@@ -1,16 +1,15 @@
 defmodule LogflareEx.BatcherCase do
   use ExUnit.CaseTemplate, async: false
-  use Mimic
   alias LogflareEx.Batcher
 
   using do
     quote do
+      use Mimic
       import LogflareEx.Factory
+      setup :set_mimic_global
+      setup :verify_on_exit!
     end
   end
-
-  setup :set_mimic_global
-  setup :verify_on_exit!
 
   # batcher cleanup
   setup do

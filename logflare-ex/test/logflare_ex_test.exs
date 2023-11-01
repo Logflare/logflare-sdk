@@ -1,7 +1,7 @@
 defmodule LogflareExTest do
   use ExUnit.Case, async: false
   use Mimic
-  alias LogflareEx
+  alias LogflareEx.BatcherSup
 
   test "send_event/2" do
     Tesla
@@ -58,8 +58,28 @@ defmodule LogflareExTest do
     end
   end
 
+  describe "batching" do
+    setup do
+      pid = start_supervised!(BatcherSup)
+      {:ok, pid: pid}
+    end
+
+    test "send_batched_events/2 queues events to be batched" do
+      reject(Tesla, :post, 2)
+
+      client = LogflareEx.client(api_key: "123", source_token: "12313", auto_flush: false)
+
+      assert :ok =
+               LogflareEx.send_batched_events(client, [%{some: "event"}, %{some_other: "event"}])
+
+      assert BatcherSup.count_batchers() == 1
+      assert LogflareEx.count_queued_events() == 2
+    end
+  end
+
   @tag :benchmark
   # Bertex is way faster
+
   test "benchmark Jason vs Bertex" do
     large_sample = %{
       "batch" =>

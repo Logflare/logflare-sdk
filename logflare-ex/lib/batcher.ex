@@ -12,6 +12,8 @@ defmodule LogflareEx.Batcher do
 
   import Ecto.Query
   alias LogflareEx.BatchedEvent
+  alias LogflareEx.BatcherRegistry
+  alias LogflareEx.Client
   alias LogflareEx.Repo
 
   # API
@@ -89,12 +91,29 @@ defmodule LogflareEx.Batcher do
   end
 
   @doc """
+  Updates the event within the batching cache
+
+  """
+  @spec update_event(BatchedEvent.t(), map()) :: {:ok, BatchedEvent.t()}
+  def update_event(event, attrs) do
+    event
+    |> BatchedEvent.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
   Deletes all events in the cache, regardless of the status.
   """
   @spec delete_all_events() :: :ok
   def delete_all_events do
     Repo.delete_all(BatchedEvent)
     :ok
+  end
+
+  def flush(kw) do
+    kw
+    |> via()
+    |> GenServer.cast(:flush)
   end
 
   @doc """
@@ -111,25 +130,108 @@ defmodule LogflareEx.Batcher do
     Repo.delete(event)
   end
 
+  def flush(kw) when is_list(kw) do
+    via(kw)
+    |> GenServer.cast(:flush)
+  end
+
+  @doc """
+  Returns the via for each partitioned Batcher
+  """
+
+  def via(%Client{source_token: "" <> token}) do
+    via(source_token: token)
+  end
+
+  def via(%Client{source_name: "" <> name}) do
+    via(source_name: name)
+  end
+
+  def via(source_name: name) do
+    {:via, Registry, {BatcherRegistry, {:source_name, name}}}
+  end
+
+  def via(source_token: token) do
+    {:via, Registry, {BatcherRegistry, {:source_token, token}}}
+  end
+
   # GenServer
 
-  def start_link(_) do
-    GenServer.start_link(__MODULE__, [])
+  def start_link(opts) when is_list(opts) do
+    opts
+    |> Client.new()
+    |> start_link()
+  end
+
+  def start_link(%Client{} = client) do
+    GenServer.start_link(__MODULE__, client, name: via(client))
   end
 
   @impl GenServer
-  def init(_) do
-    {:ok, %{}}
+  def init(%Client{source_name: name, source_token: token} = client) do
+    partition_key =
+      cond do
+        token != nil -> {:source_token, token}
+        name != nil -> {:source_name, name}
+        true -> nil
+      end
+
+    state = %{
+      client: client,
+      key: partition_key,
+      max_batch_size: 20
+    }
+
+    schedule_flush(state)
+    {:ok, state}
   end
 
-  # # GenServer
-  # @impl true
-  # def handle_call(:pop, _from, [head | tail]) do
-  #   {:reply, head, tail}
-  # end
+  def handle_cast(:flush, state) do
+    flush_events(state)
+    {:noreply, state}
+  end
 
-  # @impl true
-  # def handle_cast({:push, element}, state) do
-  #   {:noreply, [element | state]}
-  # end
+  @doc """
+  Flushes the cache of all items matching the Batcher's key.
+  """
+  @impl GenServer
+  def handle_info(:flush, state) do
+    flush_events(state)
+    schedule_flush(state)
+    {:noreply, state}
+  end
+
+  defp flush_events(state) do
+    events =
+      case state.key do
+        {:source_name, name} ->
+          list_events_by(:pending, source_name: name, limit: state.max_batch_size)
+
+        {:source_token, token} ->
+          list_events_by(:pending, source_token: token, limit: state.max_batch_size)
+      end
+
+    event_ids = for e <- events, do: e.id
+
+    batch =
+      for event <- events do
+        {:ok, e} = update_event(event, %{inflight_at: NaiveDateTime.utc_now()})
+        e.body
+      end
+
+    # Task to send batch
+    Task.start_link(fn ->
+      LogflareEx.send_events(state.client, batch)
+      Repo.delete_all(from(e in BatchedEvent, where: e.id in ^event_ids))
+    end)
+
+    :ok
+  end
+
+  defp schedule_flush(%{client: %{auto_flush: false}} = state), do: state
+
+  defp schedule_flush(state) do
+    Process.send_after(self(), :flush, state.client.flush_interval)
+    state
+  end
 end
