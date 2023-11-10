@@ -51,7 +51,7 @@ defmodule LogflareEx do
   @spec send_events(Client.t(), [map()]) :: {:ok, map()} | {:error, Tesla.Env.t()}
   def send_events(_client, []), do: {:error, :no_events}
 
-  def send_events(%Client{source_token: nil}, _batch), do: {:error, :no_source}
+  def send_events(%Client{source_token: nil, source_name: nil}, _batch), do: {:error, :no_source}
 
   def send_events(client, [%{} | _] = batch) do
     body = Bertex.encode(%{"batch" => batch, "source" => client.source_token})

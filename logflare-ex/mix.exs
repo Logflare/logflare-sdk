@@ -51,7 +51,9 @@ defmodule LogflareEx.MixProject do
       {:typed_struct, "~> 0.3.0"},
       {:logflare_etso, "~> 1.1.2"},
       {:ex_machina, "~> 2.7.0", only: :test},
-      {:typed_ecto_schema, "~> 0.4.1", runtime: false}
+      {:typed_ecto_schema, "~> 0.4.1", runtime: false},
+      {:telemetry, "~> 1.0"},
+      {:telemetry_metrics, "~> 0.6.1"}
     ]
   end
 

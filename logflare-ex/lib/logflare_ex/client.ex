@@ -1,6 +1,9 @@
 defmodule LogflareEx.Client do
   @moduledoc false
   @default_tesla_adapter {Tesla.Adapter.Finch, name: LogflareEx.Finch, receive_timeout: 30_000}
+  @default_batch_size 100
+  @default_flush_interval 5000
+
   use TypedStruct
 
   typedstruct do
@@ -14,7 +17,8 @@ defmodule LogflareEx.Client do
     field(:on_error, list() | mfa(), default: nil)
     # batching
     field(:auto_flush, :boolean, default: true)
-    field(:flush_interval, non_neg_integer())
+    field(:flush_interval, non_neg_integer(), default: @default_flush_interval)
+    field(:batch_size, non_neg_integer(), default: @default_batch_size)
   end
 
   @typep opts :: [api_key: String.t(), api_url: String.t(), tesla_client: Tesla.Client.t()]

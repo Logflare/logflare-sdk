@@ -107,9 +107,9 @@ defmodule LogflareEx.BatcherTest do
 
     test "manual flush by source token" do
       client = Client.new(source_token: "some-uuid", auto_flush: false)
-      pid = start_link_supervised!({Batcher, client})
+      start_link_supervised!({Batcher, client})
 
-      event = insert(:pending_event, source_token: "some-uuid")
+      insert(:pending_event, source_token: "some-uuid")
       assert :ok = Batcher.flush(source_token: "some-uuid")
       Process.sleep(1000)
       assert [] = Batcher.list_events_by(:all)
@@ -117,9 +117,9 @@ defmodule LogflareEx.BatcherTest do
 
     test "manual flush by source name" do
       client = Client.new(source_name: "some name", auto_flush: false)
-      pid = start_supervised!({Batcher, client})
+      start_supervised!({Batcher, client})
 
-      event = insert(:pending_event, source_name: "some name")
+      insert(:pending_event, source_name: "some name")
       assert :ok = Batcher.flush(source_name: "some name")
       Process.sleep(500)
       assert [] = Batcher.list_events_by(:all)
@@ -127,17 +127,17 @@ defmodule LogflareEx.BatcherTest do
 
     test "auto flush" do
       client = Client.new(source_name: "some name", auto_flush: true, flush_interval: 100)
-      pid = start_supervised!({Batcher, client})
+      start_supervised!({Batcher, client})
 
-      event = insert(:pending_event, source_name: "some name")
+      insert(:pending_event, source_name: "some name")
       Process.sleep(500)
       assert [] = Batcher.list_events_by(:all)
     end
 
     test ":auto_flush disabled" do
       client = Client.new(source_name: "some name", auto_flush: false, flush_interval: 100)
-      pid = start_supervised!({Batcher, client})
-      event = insert(:pending_event, source_name: "some name")
+      start_supervised!({Batcher, client})
+      insert(:pending_event, source_name: "some name")
       Process.sleep(500)
       assert [_] = Batcher.list_events_by(:all)
     end

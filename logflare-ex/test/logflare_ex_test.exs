@@ -5,11 +5,18 @@ defmodule LogflareExTest do
 
   test "send_event/2" do
     Tesla
-    |> expect(:post, fn _client, _path, _body ->
+    |> expect(:post, 2, fn _client, _path, _body ->
       %Tesla.Env{status: 201, body: Jason.encode!(%{"message" => "server msg"})}
     end)
 
+    # send with source token
     client = LogflareEx.client(api_key: "123", source_token: "12313")
+    assert %LogflareEx.Client{api_key: "123"} = client
+
+    assert {:ok, %{"message" => "server msg"}} = LogflareEx.send_event(client, %{some: "event"})
+
+    # send with source name
+    client = LogflareEx.client(api_key: "123", source_name: "12313")
     assert %LogflareEx.Client{api_key: "123"} = client
 
     assert {:ok, %{"message" => "server msg"}} = LogflareEx.send_event(client, %{some: "event"})

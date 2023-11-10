@@ -28,7 +28,6 @@ defmodule LogflareEx.Batcher do
   Required fields:
   - :body
   - :source_token or :source_name
-
   """
   @spec create_event(map()) :: {:ok, BatchedEvent.t()}
   def create_event(attrs) do
@@ -91,8 +90,7 @@ defmodule LogflareEx.Batcher do
   end
 
   @doc """
-  Updates the event within the batching cache
-
+  Updates the event within the batching cache.
   """
   @spec update_event(BatchedEvent.t(), map()) :: {:ok, BatchedEvent.t()}
   def update_event(event, attrs) do
@@ -110,6 +108,15 @@ defmodule LogflareEx.Batcher do
     :ok
   end
 
+  @doc """
+  Performs a flush for the given source.
+
+  Accepts the following filters: `:source_name` or `:source_token`
+
+  Flush is performed asyncronously.
+  """
+  @typep kw_filter :: [{:source_name, String.t()} | {:source_token, String.t()}]
+  @spec flush(kw_filter()) :: :ok
   def flush(kw) do
     kw
     |> via()
@@ -126,34 +133,27 @@ defmodule LogflareEx.Batcher do
   {:ok, %BatchedEvent{...}}
   ```
   """
+  @spec delete_event(BatchedEvent.t()) :: {:ok, BatchedEvent.t()}
   def delete_event(%BatchedEvent{} = event) do
     Repo.delete(event)
   end
 
-  def flush(kw) when is_list(kw) do
-    via(kw)
-    |> GenServer.cast(:flush)
-  end
-
   @doc """
-  Returns the via for each partitioned Batcher
+  Returns the via for each partitioned Batcher. Accepts a `source_token` or `source_name` filter or a `%LogflareEx.Client{}` struct.
+
+  ### Example
+
+  ```elixir
+  via(source_name: "my source")
+  via(source_token: "some-uuid")
+  via(%LogflareEx.Client{...})
+  ```
   """
-
-  def via(%Client{source_token: "" <> token}) do
-    via(source_token: token)
-  end
-
-  def via(%Client{source_name: "" <> name}) do
-    via(source_name: name)
-  end
-
-  def via(source_name: name) do
-    {:via, Registry, {BatcherRegistry, {:source_name, name}}}
-  end
-
-  def via(source_token: token) do
-    {:via, Registry, {BatcherRegistry, {:source_token, token}}}
-  end
+  @spec via(Client.t() | kw_filter()) :: identifier()
+  def via(%Client{source_token: "" <> token}), do: via(source_token: token)
+  def via(%Client{source_name: "" <> name}), do: via(source_name: name)
+  def via(source_name: name), do: {:via, Registry, {BatcherRegistry, {:source_name, name}}}
+  def via(source_token: token), do: {:via, Registry, {BatcherRegistry, {:source_token, token}}}
 
   # GenServer
 
@@ -178,22 +178,20 @@ defmodule LogflareEx.Batcher do
 
     state = %{
       client: client,
-      key: partition_key,
-      max_batch_size: 20
+      key: partition_key
     }
 
     schedule_flush(state)
     {:ok, state}
   end
 
+  @impl GenServer
   def handle_cast(:flush, state) do
     flush_events(state)
     {:noreply, state}
   end
 
-  @doc """
-  Flushes the cache of all items matching the Batcher's key.
-  """
+  # Flushes the cache of all items matching the Batcher's key.
   @impl GenServer
   def handle_info(:flush, state) do
     flush_events(state)
@@ -205,10 +203,10 @@ defmodule LogflareEx.Batcher do
     events =
       case state.key do
         {:source_name, name} ->
-          list_events_by(:pending, source_name: name, limit: state.max_batch_size)
+          list_events_by(:pending, source_name: name, limit: state.client.batch_size)
 
         {:source_token, token} ->
-          list_events_by(:pending, source_token: token, limit: state.max_batch_size)
+          list_events_by(:pending, source_token: token, limit: state.client.batch_size)
       end
 
     event_ids = for e <- events, do: e.id

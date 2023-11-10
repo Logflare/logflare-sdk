@@ -26,7 +26,7 @@ defmodule LogflareEx.BatcherSup do
       {:error, {:already_started, _pid}} ->
         :ok
 
-      {:ok, pid} ->
+      {:ok, _pid} ->
         :ok
 
       err ->
