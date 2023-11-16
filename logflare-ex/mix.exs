@@ -53,7 +53,8 @@ defmodule LogflareEx.MixProject do
       {:ex_machina, "~> 2.7.0", only: :test},
       {:typed_ecto_schema, "~> 0.4.1", runtime: false},
       {:telemetry, "~> 1.0"},
-      {:telemetry_metrics, "~> 0.6.1"}
+      {:telemetry_metrics, "~> 0.6.1"},
+      {:benchee_async, "~> 0.1.2"}
     ]
   end
 

@@ -114,4 +114,43 @@ defmodule LogflareExTest do
       end
     })
   end
+
+
+  @tag :benchmark
+  # Bertex is way faster
+  describe "async benchmark" do
+    setup :set_mimic_global
+    setup do
+      start_supervised!(BatcherSup)
+      start_supervised!(BencheeAsync.Reporter)
+      :ok
+    end
+    test "api request rate" do
+        Tesla
+        |> stub(:post, fn _client, _path, body ->
+          %{"batch"=> batch} = Bertex.decode(body)
+          BencheeAsync.Reporter.record(length(batch))
+          %Tesla.Env{status: 201, body: Jason.encode!(%{"message" => "server msg"})}
+        end)
+
+      event = %{"some" => "events", "other" => "something", "nested" => [%{"again" => "value"}]}
+
+
+      BencheeAsync.run(%{
+        "no batching" => fn ->
+          LogflareEx.client(source_name: "somename")
+          |> LogflareEx.send_event(event)
+        end,
+        "batching" => fn ->
+          LogflareEx.client(source_name: "some-batched-name", flush_interval: 500)
+          |> LogflareEx.send_batched_event(event)
+        end,
+      },
+      time: 2,
+      warmup: 1,
+      # use extended_statistics to view units of work done
+      formatters: [{Benchee.Formatters.Console, extended_statistics: true}]
+      )
+    end
+  end
 end

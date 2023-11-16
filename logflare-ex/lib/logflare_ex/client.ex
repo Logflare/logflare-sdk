@@ -1,8 +1,8 @@
 defmodule LogflareEx.Client do
   @moduledoc false
   @default_tesla_adapter {Tesla.Adapter.Finch, name: LogflareEx.Finch, receive_timeout: 30_000}
-  @default_batch_size 100
-  @default_flush_interval 5000
+  @default_batch_size 200
+  @default_flush_interval 2_000
 
   use TypedStruct
 
@@ -33,7 +33,8 @@ defmodule LogflareEx.Client do
         source_name: get_config_value(:source_name),
         tesla_client: nil,
         on_error: get_config_value(:on_error),
-        flush_interval: get_config_value(:flush_interval) || 1_000
+        flush_interval: get_config_value(:flush_interval) || @default_flush_interval,
+        batch_size: get_config_value(:batch_size) || @default_batch_size
       })
 
     tesla_client =
