@@ -117,6 +117,9 @@ defmodule LogflareEx.Batcher do
   """
   @typep kw_filter :: [{:source_name, String.t()} | {:source_token, String.t()}]
   @spec flush(kw_filter()) :: :ok
+  def flush(%Client{source_name: source_name}), do: flush(source_name: source_name)
+  def flush(%Client{source_token: source_token}), do: flush(source_token: source_token)
+
   def flush(kw) do
     kw
     |> via()
