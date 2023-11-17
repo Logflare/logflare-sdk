@@ -95,4 +95,13 @@ defmodule LogflareEx do
     Repo.all(BatchedEvent)
     |> length()
   end
+
+  @doc """
+  Performs a flush for a given client. Attempts to clear the queue of events for the given client.
+  """
+  @spec flush(Client.t()) :: :ok
+  def flush(client) do
+    BatcherSup.ensure_started(client)
+    Batcher.flush(client)
+  end
 end
