@@ -10,21 +10,19 @@ defmodule LogflareEx.LoggerBackend.Formatter do
       new(level, message, ts, Map.new(metadata))
     rescue
       e ->
-        raise e
-
         %{
-          # "timestamp" => NaiveDateTime.to_iso8601(NaiveDateTime.utc_now(), :extended) <> "Z",
-          # "message" => "#{__MODULE__} error: #{inspect(e, safe: true)}",
-          # "metadata" => %{
-          #   "formatter_error_params" => %{
-          #     "metadata" =>
-          #       inspect(metadata, safe: true, limit: :infinity, printable_limit: :infinity),
-          #     "timestamp" => inspect(ts),
-          #     "message" => inspect(message),
-          #     "level" => inspect(level)
-          #   },
-          #   "level" => "error"
-          # }
+          "timestamp" => NaiveDateTime.to_iso8601(NaiveDateTime.utc_now(), :extended) <> "Z",
+          "message" => "#{__MODULE__} error: #{inspect(e, safe: true)}",
+          "metadata" => %{
+            "formatter_error_params" => %{
+              "metadata" =>
+                inspect(metadata, safe: true, limit: :infinity, printable_limit: :infinity),
+              "timestamp" => inspect(ts),
+              "message" => inspect(message),
+              "level" => inspect(level)
+            },
+            "level" => "error"
+          }
         }
     end
   end
