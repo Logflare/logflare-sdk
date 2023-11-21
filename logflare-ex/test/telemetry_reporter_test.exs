@@ -10,7 +10,6 @@ defmodule LogflareEx.TelemetryReporterTest do
       start_supervised!(BatcherSup)
       source_name = Application.get_env(:logflare_ex, :source_name)
       Application.put_env(:logflare_ex, :source_name, "some name")
-      Process.sleep(500)
 
       on_exit(fn ->
         :telemetry.detach("my-id")
@@ -66,7 +65,7 @@ defmodule LogflareEx.TelemetryReporterTest do
         {:ok, %{some: "stop metadata"}}
       end)
 
-      Process.sleep(500)
+      Process.sleep(1_000)
     end
   end
 end

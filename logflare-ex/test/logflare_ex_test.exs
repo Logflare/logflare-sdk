@@ -1,5 +1,5 @@
 defmodule LogflareExTest do
-  use ExUnit.Case, async: false
+  use LogflareEx.BatcherCase
   use Mimic
   alias LogflareEx.BatcherSup
 
