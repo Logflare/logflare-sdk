@@ -69,4 +69,13 @@ defmodule LogflareEx.Client do
   def get_config_value(key) do
     Application.get_env(:logflare_ex, key)
   end
+
+  def validate_client(%__MODULE__{source_name: nil, source_token: nil}),
+    do: {:error, :invalid_config}
+
+  def validate_client(%__MODULE__{api_key: nil}), do: {:error, :invalid_config}
+  def validate_client(%__MODULE__{flush_interval: i}) when i < 0, do: {:error, :invalid_config}
+  def validate_client(%__MODULE__{batch_size: i}) when i < 0, do: {:error, :invalid_config}
+  def validate_client(%__MODULE__{}), do: :ok
+  def validate_client(_), do: {:error, :invalid_config}
 end

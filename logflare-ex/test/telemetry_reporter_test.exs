@@ -10,6 +10,7 @@ defmodule LogflareEx.TelemetryReporterTest do
       start_supervised!(BatcherSup)
       source_name = Application.get_env(:logflare_ex, :source_name)
       Application.put_env(:logflare_ex, :source_name, "some name")
+      Process.sleep(500)
 
       on_exit(fn ->
         :telemetry.detach("my-id")
@@ -25,7 +26,7 @@ defmodule LogflareEx.TelemetryReporterTest do
 
       :telemetry.attach("my-id", [:some, :event], &TelemetryReporter.handle_attach/4,
         auto_flush: true,
-        flush_interval: 100
+        flush_interval: 50
       )
 
       :telemetry.execute([:some, :event], %{latency: 123}, %{some: "metadata"})
