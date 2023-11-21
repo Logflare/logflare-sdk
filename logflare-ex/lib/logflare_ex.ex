@@ -86,7 +86,6 @@ defmodule LogflareEx do
   @spec send_batched_events(Client.t(), [map()]) :: :ok
   def send_batched_event(client, %{} = event), do: send_batched_events(client, [event])
 
-
   @doc """
   Sends events in batches. Configuration of the batching is dependent on the provided client.
 
@@ -123,7 +122,6 @@ defmodule LogflareEx do
 
     :ok
   end
-
 
   @doc """
   Returns a count of all queued events.
