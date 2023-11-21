@@ -1,4 +1,33 @@
 defmodule LogflareEx.TelemetryReporter do
+  @moduledoc """
+  A TelemetryReporter for attaching to metrics created from `:telemetry_metrics`.
+  Telemetry events are sent to the Logflare API as is.
+
+  Add the following to your `mix.exs`
+  ```elixir
+  def deps do
+    [
+        {:telemetry, "~> 1.0"},
+        {:telemetry_metrics, "~> 0.6.1"},
+    ]
+  end
+  ```
+
+  Thereafter, add the `LogflareEx.TelemetryReporter` to your supervision tree:
+
+  ```elixir
+    # application.ex
+    children = [
+      {LogflareEx.TelemetryReporter, metrics: [
+        last_value("some.event.stop.duration")
+      ]}
+    ]
+    ...
+  ```
+
+  The `LogflareEx.TelemetryReporter` will attach to all provided metrics.
+
+  """
   use GenServer
   require Logger
 
