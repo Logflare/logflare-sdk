@@ -6,7 +6,7 @@ defmodule LogflareEx.MixProject do
   def project do
     [
       app: :logflare_ex,
-      version: "0.1.1#{@version_suffix}",
+      version: "0.2.0#{@version_suffix}",
       build_path: "./_build",
       config_path: "./config/config.exs",
       deps_path: "./deps",
