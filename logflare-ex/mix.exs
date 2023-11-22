@@ -6,7 +6,7 @@ defmodule LogflareEx.MixProject do
   def project do
     [
       app: :logflare_ex,
-      version: "0.1.1#{@version_suffix}",
+      version: "0.2.0#{@version_suffix}",
       build_path: "./_build",
       config_path: "./config/config.exs",
       deps_path: "./deps",
@@ -31,7 +31,8 @@ defmodule LogflareEx.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger]
+      extra_applications: if(Mix.env() != :test, do: [:logger], else: [:logger, :runtime_tools]),
+      mod: {LogflareEx.Application, []}
     ]
   end
 
@@ -42,12 +43,19 @@ defmodule LogflareEx.MixProject do
       {:finch, "~> 0.10"},
       {:bertex, "~> 1.3"},
       {:jason, ">= 1.0.0"},
-      {:bypass, "~> 2.1", only: :test},
+      {:logflare_etso, "~> 1.1.2"},
+      {:plug, "~> 1.0", only: :test},
+      {:telemetry, "~> 1.0", optional: true},
+      {:telemetry_metrics, "~> 0.6.1", optional: true},
       {:benchee, "~> 1.0", only: [:dev, :test], runtime: false},
-      {:mix_test_watch, "~> 1.0", only: :dev, runtime: false},
+      {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:mimic, "~> 1.7", only: :test},
-      {:typed_struct, "~> 0.3.0"}
+      {:typed_struct, "~> 0.3.0", runtime: false},
+      {:ex_machina, "~> 2.7.0", only: :test},
+      {:typed_ecto_schema, "~> 0.4.1", runtime: false},
+      {:benchee_async, "~> 0.1.2", only: [:test, :dev]},
+      {:stream_data, "~> 0.5", only: :test}
     ]
   end
 
