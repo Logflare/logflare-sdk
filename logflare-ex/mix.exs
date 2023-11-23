@@ -54,7 +54,7 @@ defmodule LogflareEx.MixProject do
       {:typed_struct, "~> 0.3.0", runtime: false},
       {:ex_machina, "~> 2.7.0", only: :test},
       {:typed_ecto_schema, "~> 0.4.1", runtime: false},
-      {:benchee_async, "~> 0.1.2", only: [:test, :dev]},
+      {:benchee_async, "== 0.1.2", only: [:test, :dev]},
       {:stream_data, "~> 0.5", only: :test}
     ]
   end
