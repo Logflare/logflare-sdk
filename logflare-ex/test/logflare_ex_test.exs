@@ -6,7 +6,7 @@ defmodule LogflareExTest do
   test "send_event/2" do
     Tesla
     |> expect(:post, 2, fn _client, _path, _body ->
-      %Tesla.Env{status: 201, body: Jason.encode!(%{"message" => "server msg"})}
+      {:ok, %Tesla.Env{status: 201, body: Jason.encode!(%{"message" => "server msg"})}}
     end)
 
     # send with source token
@@ -22,7 +22,9 @@ defmodule LogflareExTest do
     assert {:ok, %{"message" => "server msg"}} = LogflareEx.send_event(client, %{some: "event"})
 
     Tesla
-    |> expect(:post, fn _client, _path, _body -> %Tesla.Env{status: 500, body: "server err"} end)
+    |> expect(:post, fn _client, _path, _body ->
+      {:error, %Tesla.Env{status: 500, body: "server err"}}
+    end)
 
     assert {:error, %Tesla.Env{}} = LogflareEx.send_event(client, %{some: "event"})
   end
@@ -30,7 +32,7 @@ defmodule LogflareExTest do
   test "send_events/2" do
     Tesla
     |> expect(:post, fn _client, _path, _body ->
-      %Tesla.Env{status: 201, body: Jason.encode!(%{"message" => "server msg"})}
+      {:ok, %Tesla.Env{status: 201, body: Jason.encode!(%{"message" => "server msg"})}}
     end)
 
     client = LogflareEx.client(api_key: "123", source_token: "123")
@@ -49,7 +51,7 @@ defmodule LogflareExTest do
     test "triggers on_error mfa if non-201 status is encountered" do
       Tesla
       |> expect(:post, 2, fn _client, _path, _body ->
-        %Tesla.Env{status: 500, body: "some server error"}
+        {:error, %Tesla.Env{status: 500, body: "some server error"}}
       end)
 
       LogflareEx.TestUtils
@@ -131,7 +133,7 @@ defmodule LogflareExTest do
       |> stub(:post, fn _client, _path, body ->
         %{"batch" => batch} = Bertex.decode(body)
         BencheeAsync.Reporter.record(length(batch))
-        %Tesla.Env{status: 201, body: Jason.encode!(%{"message" => "server msg"})}
+        {:ok, %Tesla.Env{status: 201, body: Jason.encode!(%{"message" => "server msg"})}}
       end)
 
       event = %{"some" => "events", "other" => "something", "nested" => [%{"again" => "value"}]}

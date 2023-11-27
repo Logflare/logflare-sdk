@@ -100,7 +100,9 @@ defmodule LogflareEx.BatcherTest do
   describe "Batcher genserver" do
     setup do
       Tesla
-      |> stub(:post, fn _client, _path, _body -> %Tesla.Env{status: 200, body: "ok"} end)
+      |> stub(:post, fn _client, _path, _body ->
+        {:ok, %Tesla.Env{status: 200, body: Jason.encode!(%{})}}
+      end)
 
       :ok
     end

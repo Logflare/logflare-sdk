@@ -38,7 +38,7 @@ defmodule LogflareEx.LoggerBackendTest do
       |> expect(:post, 1, fn _client, _path, body ->
         batch = Bertex.decode(body)["batch"]
         assert length(batch) == 10
-        %Tesla.Env{status: 201, body: Jason.encode!(%{"message" => "server msg"})}
+        {:ok, %Tesla.Env{status: 201, body: Jason.encode!(%{"message" => "server msg"})}}
       end)
 
       assert LogflareEx.count_queued_events() == 0
@@ -289,7 +289,7 @@ defmodule LogflareEx.LoggerBackendTest do
     |> stub(:post, fn _client, _path, body ->
       batch = Bertex.decode(body)["batch"]
       send(pid, batch)
-      %Tesla.Env{status: 201, body: Jason.encode!(%{"message" => "server msg"})}
+      {:ok, %Tesla.Env{status: 201, body: Jason.encode!(%{"message" => "server msg"})}}
     end)
 
     :ok

@@ -20,7 +20,7 @@ defmodule LogflareEx.TelemetryReporterTest do
     test "handle_attach/4" do
       Tesla
       |> expect(:post, fn _client, _path, _body ->
-        %Tesla.Env{status: 201, body: Jason.encode!(%{"message" => "server msg"})}
+        {:ok, %Tesla.Env{status: 201, body: Jason.encode!(%{"message" => "server msg"})}}
       end)
 
       :telemetry.attach("my-id", [:some, :event], &TelemetryReporter.handle_attach/4,
@@ -46,7 +46,7 @@ defmodule LogflareEx.TelemetryReporterTest do
     test "metrics opt" do
       Tesla
       |> expect(:post, fn _client, _path, _body ->
-        %Tesla.Env{status: 201, body: Jason.encode!(%{"message" => "server msg"})}
+        {:ok, %Tesla.Env{status: 201, body: Jason.encode!(%{"message" => "server msg"})}}
       end)
 
       start_supervised!(
