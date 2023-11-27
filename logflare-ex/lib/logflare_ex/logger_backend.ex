@@ -104,6 +104,11 @@ defmodule LogflareEx.LoggerBackend do
     {:ok, state}
   end
 
+  def handle_info(:flush, state) do
+    LogflareEx.flush(state.client)
+    {:ok, state}
+  end
+
   def handle_call({:configure, options}, _config) do
     config = build_default_config(options)
     maybe_start(config)
