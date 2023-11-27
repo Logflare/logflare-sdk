@@ -3,6 +3,8 @@ defmodule LogflareEx.TelemetryReporter do
   A TelemetryReporter for attaching to metrics created from `:telemetry_metrics`.
   Telemetry events are sent to the Logflare API as is.
 
+  ### Usage
+
   Add the following to your `mix.exs`
   ```elixir
   def deps do
@@ -27,6 +29,15 @@ defmodule LogflareEx.TelemetryReporter do
 
   The `LogflareEx.TelemetryReporter` will attach to all provided metrics.
 
+  ### Configuration
+
+  There are 2 levels of configuration available, and these are listed in priority order:
+
+  1. Module level configuration via `config.exs`, such as `config :logflare_ex, #{__MODULE__}, source_token: ...`
+  2. Application level configuration via `config.exs`, such as`config :logflare_ex, source_token: ...`
+
+  Client options will then be merged together, with each level overriding the previous.
+
   """
   use GenServer
   require Logger
@@ -40,6 +51,11 @@ defmodule LogflareEx.TelemetryReporter do
     do: handle_attach(event, measurements, metadata, [])
 
   def handle_attach(event, measurements, metadata, config) when is_list(config) do
+    # merge configuration
+    config_file_opts = (Application.get_env(:logflare_ex, __MODULE__) || []) |> Map.new()
+    opts = Enum.into(config, config_file_opts)
+
+    # split handler paths
     event_str = Enum.map_join(event, ".", &Atom.to_string(&1))
 
     measurements_str =
@@ -48,7 +64,7 @@ defmodule LogflareEx.TelemetryReporter do
       end)
 
     message = "#{event_str} | #{measurements_str}"
-    client = LogflareEx.client(config)
+    client = LogflareEx.client(opts)
 
     LogflareEx.send_batched_event(client, %{
       message: message,

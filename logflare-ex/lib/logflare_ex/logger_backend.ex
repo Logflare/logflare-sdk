@@ -17,6 +17,16 @@ defmodule LogflareEx.LoggerBackend do
   Logger.info("some event", my: "data")
   ```
 
+  ### Configuration
+
+  There are 3 levels of configuration available, and these are listed in priority order:
+
+  1. Runtime Logger configuration, such as  `Logger.configure(...)`
+  2. Module level configuration via `config.exs`, such as `config :logflare_ex, #{__MODULE__}, source_token: ...`
+  3. Application level configuration via `config.exs`, such as`config :logflare_ex, source_token: ...`
+
+  Options will then be merged together, with each level overriding the previous.
+
   ### Metadata
   To add custom metadata, use `Logger.metadata/1`
   ```elixir
@@ -143,7 +153,9 @@ defmodule LogflareEx.LoggerBackend do
   defp log_level_matches?(lvl, min), do: Logger.compare_levels(lvl, min) != :lt
 
   defp build_default_config(options \\ []) do
-    client = LogflareEx.client(options)
+    config_file_opts = (Application.get_env(:logflare_ex, __MODULE__) || []) |> Map.new()
+    opts = Enum.into(options, config_file_opts)
+    client = LogflareEx.client(opts)
 
     client =
       if :ok == LogflareEx.Client.validate_client(client) do
