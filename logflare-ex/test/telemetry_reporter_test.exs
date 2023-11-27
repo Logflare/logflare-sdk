@@ -68,4 +68,48 @@ defmodule LogflareEx.TelemetryReporterTest do
       Process.sleep(1_000)
     end
   end
+
+  describe "Configuration" do
+    setup do
+      start_supervised!(BatcherSup)
+      env = Application.get_env(:logflare_ex, TelemetryReporter)
+      Application.put_env(:logflare_ex, TelemetryReporter, api_url: "http://custom-url.com")
+
+      on_exit(fn ->
+        Application.put_env(:logflare_ex, TelemetryReporter, env)
+        :telemetry.detach("my-id")
+      end)
+
+      :ok
+    end
+
+    test "LoggerBackend level configuration" do
+      pid = self()
+
+      Tesla
+      |> expect(:post, fn client, _path, _body ->
+        assert inspect(client.pre) =~ "custom-url.com"
+        assert inspect(client.pre) =~ "some-key"
+        send(pid, :ok)
+        {:ok, %Tesla.Env{status: 201, body: Jason.encode!(%{"message" => "server msg"})}}
+      end)
+
+      start_supervised!(
+        {TelemetryReporter,
+         metrics: [
+           last_value("some.event.latency")
+         ],
+         source_name: "some-source",
+         api_key: "some-key",
+         auto_flush: true,
+         flush_interval: 100}
+      )
+
+      Process.sleep(500)
+
+      :telemetry.execute([:some, :event], %{latency: 123})
+
+      assert_receive :ok, 1_000
+    end
+  end
 end
