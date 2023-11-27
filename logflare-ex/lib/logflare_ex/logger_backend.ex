@@ -99,7 +99,11 @@ defmodule LogflareEx.LoggerBackend do
     {:ok, config}
   end
 
-  @spec handle_call({:configure, keyword()}, map()) :: {:ok, :ok, map()}
+  def handle_info({:log_after, level, message}, state) do
+    Logger.log(level, message)
+    {:ok, state}
+  end
+
   def handle_call({:configure, options}, _config) do
     config = build_default_config(options)
     maybe_start(config)
@@ -116,14 +120,19 @@ defmodule LogflareEx.LoggerBackend do
   defp maybe_start(config) do
     with :ok <- LogflareEx.Client.validate_client(config.client) do
       msg = "[#{__MODULE__}] v#{Application.spec(@app, :vsn)} started."
-      Logger.info(msg)
-
-      LogflareEx.send_batched_event(config.client, %{"message" => msg})
+      log_after(:info, msg)
       :ok
     else
       {:error, :invalid_config} = err ->
-        Logger.error("[#{__MODULE__}] Invalid client configuration on backend init")
+        log_after(:error, "[#{__MODULE__}] Invalid client configuration on backend init")
         err
+    end
+  end
+
+  # delayed logging to ensure applications are started
+  defp log_after(level, message, delay \\ 5_000) do
+    if Application.get_env(:logflare_ex, :env) != :test do
+      Process.send_after(self(), {:log_after, level, message}, delay)
     end
   end
 
