@@ -36,7 +36,7 @@ jobs:
         if: github.event_name == 'push'
         env:
           HEX_API_KEY: ${{ secrets.HEX_AUTH_TOKEN }}
-          LOGFLARE_EX_PRERELEASE_VERSION: dev.${{ env.short_sha }}
+          LOGFLARE_EX_PRERELEASE_VERSION: dev+${{ env.short_sha }}
       - run: mix hex.publish --yes
         if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
         env:
