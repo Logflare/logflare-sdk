@@ -59,13 +59,13 @@ defmodule LogflareEx.TelemetryReporterTest do
          flush_interval: 100}
       )
 
-      Process.sleep(500)
+      Process.sleep(300)
 
       :telemetry.span([:some, :event], %{some: "metadata"}, fn ->
         {:ok, %{some: "stop metadata"}}
       end)
 
-      Process.sleep(1_000)
+      Process.sleep(300)
     end
   end
 
@@ -105,7 +105,7 @@ defmodule LogflareEx.TelemetryReporterTest do
          flush_interval: 100}
       )
 
-      Process.sleep(500)
+      Process.sleep(300)
 
       :telemetry.execute([:some, :event], %{latency: 123})
 
