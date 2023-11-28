@@ -237,7 +237,6 @@ defmodule LogflareEx.LoggerBackendTest do
     #     assert_receive [ %{ "metadata" => %{"data" => "" <> _} } ]
     #   end
     # end
-
     test "NaiveDateTime to String.Chars protocol" do
       ndt = NaiveDateTime.new!(1337, 4, 19, 0, 0, 0)
       log_data(ndt)
@@ -274,6 +273,36 @@ defmodule LogflareEx.LoggerBackendTest do
           }
         }
       ]
+    end
+  end
+
+  describe "Configuration" do
+    setup do
+      env = Application.get_env(:logflare_ex, LoggerBackend)
+      Application.put_env(:logflare_ex, LoggerBackend, api_url: "http://custom-url.com")
+
+      on_exit(fn ->
+        Application.put_env(:logflare_ex, LoggerBackend, env)
+      end)
+
+      :ok
+    end
+
+    setup [:start_batcher_sup, :add_backend]
+
+    test "LoggerBackend level configuration" do
+      pid = self()
+
+      Tesla
+      |> expect(:post, 1, fn client, _path, _body ->
+        assert inspect(client.pre) =~ "http://custom-url.com"
+        send(pid, :ok)
+        {:ok, %Tesla.Env{status: 201, body: Jason.encode!(%{"message" => "server msg"})}}
+      end)
+
+      log_data(:ok)
+
+      assert_receive :ok
     end
   end
 
