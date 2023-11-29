@@ -22,10 +22,11 @@ defmodule LogflareEx.LoggerBackendTest do
         {:ok, _pid} = Logger.add_backend(LoggerBackend)
 
         :ok =
-          Logger.configure_backend(LoggerBackend, source_token: "some-token", flush_interval: 500)
+          Logger.configure_backend(LoggerBackend, source_token: "some-token", flush_interval: 200)
 
         Logger.put_module_level(__MODULE__, :all)
-        :timer.sleep(600)
+        Logger.flush()
+        :timer.sleep(300)
       end)
 
       on_exit(fn ->
@@ -58,7 +59,7 @@ defmodule LogflareEx.LoggerBackendTest do
       end) =~ "a log event"
 
       assert LogflareEx.count_queued_events() == 10
-      Process.sleep(500)
+      Process.sleep(300)
       # should clear cache
       assert LogflareEx.count_queued_events() == 0
     end
@@ -99,7 +100,7 @@ defmodule LogflareEx.LoggerBackendTest do
       assert capture_log(fn ->
                spawn(fn -> 3.14 / 0 end)
                spawn(fn -> Enum.find(nil, & &1) end)
-               Process.sleep(500)
+               Process.sleep(300)
              end) =~ "Protocol.UndefinedError"
 
       assert_receive :ok
@@ -338,7 +339,7 @@ defmodule LogflareEx.LoggerBackendTest do
 
     # clear the test process inbox
     capture_io(fn -> :c.flush() end)
-    :timer.sleep(500)
+    :timer.sleep(300)
 
     on_exit(fn ->
       Logger.remove_backend(LoggerBackend)

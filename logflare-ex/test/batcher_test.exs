@@ -113,7 +113,7 @@ defmodule LogflareEx.BatcherTest do
 
       insert(:pending_event, source_token: "some-uuid")
       assert :ok = Batcher.flush(source_token: "some-uuid")
-      Process.sleep(1000)
+      Process.sleep(300)
       assert [] = Batcher.list_events_by(:all)
     end
 
@@ -123,7 +123,7 @@ defmodule LogflareEx.BatcherTest do
 
       insert(:pending_event, source_name: "some name")
       assert :ok = Batcher.flush(source_name: "some name")
-      Process.sleep(500)
+      Process.sleep(300)
       assert [] = Batcher.list_events_by(:all)
     end
 
@@ -132,7 +132,7 @@ defmodule LogflareEx.BatcherTest do
       start_supervised!({Batcher, client})
 
       insert(:pending_event, source_name: "some name")
-      Process.sleep(500)
+      Process.sleep(300)
       assert [] = Batcher.list_events_by(:all)
     end
 
@@ -140,7 +140,7 @@ defmodule LogflareEx.BatcherTest do
       client = Client.new(source_name: "some name", auto_flush: false, flush_interval: 100)
       start_supervised!({Batcher, client})
       insert(:pending_event, source_name: "some name")
-      Process.sleep(500)
+      Process.sleep(300)
       assert [_] = Batcher.list_events_by(:all)
     end
   end
