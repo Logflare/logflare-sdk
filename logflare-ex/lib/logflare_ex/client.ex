@@ -47,8 +47,8 @@ defmodule LogflareEx.Client do
 
   """
   @default_tesla_adapter {Tesla.Adapter.Finch, name: LogflareEx.Finch, receive_timeout: 30_000}
-  @default_batch_size 200
-  @default_flush_interval 2_000
+  @default_batch_size 100
+  @default_flush_interval 1_500
 
   use TypedStruct
 
