@@ -3,11 +3,14 @@ defmodule LogflareEx.LoggerBackend.Formatter do
   alias LogflareEx.LoggerBackend.Stacktrace
   require Logger
 
-  def format(level, message, ts, metadata) do
-    # dbg({level, message, ts, metadata})
+  def format(level, message, ts, metadata, config) do
+    metadata = Map.new(metadata)
+    {toplevel, metadata} = Map.split(metadata, config.toplevel)
+
+    toplevel = traverse_convert(toplevel)
 
     try do
-      new(level, message, ts, Map.new(metadata))
+      new(level, message, ts, metadata)
     rescue
       e ->
         %{
@@ -25,6 +28,7 @@ defmodule LogflareEx.LoggerBackend.Formatter do
           }
         }
     end
+    |> Map.merge(toplevel)
   end
 
   @doc """
@@ -61,7 +65,7 @@ defmodule LogflareEx.LoggerBackend.Formatter do
     end
   end
 
-  def enrich(context, :vm) do
+  defp enrich(context, :vm) do
     Map.merge(context, %{"vm" => %{"node" => "#{Node.self()}"}})
   end
 
@@ -88,7 +92,7 @@ defmodule LogflareEx.LoggerBackend.Formatter do
   end
 
   def encode_timestamp({date, {hour, minute, second, milli}}) when is_integer(milli) do
-    erldt =
+    {date, {hour, minute, second}} =
       {date, {hour, minute, second}}
       |> :calendar.local_time_to_universal_time_dst()
       |> case do
@@ -97,13 +101,10 @@ defmodule LogflareEx.LoggerBackend.Formatter do
         [_, dt_utc] -> dt_utc
       end
 
-    erldt
-    |> NaiveDateTime.from_erl!({milli * 1000, 6})
-    |> NaiveDateTime.to_iso8601(:extended)
-    |> Kernel.<>("Z")
+    encode_timestamp({date, {hour, minute, second, {milli * 1000, 6}}})
   end
 
-  def encode_metadata(meta) when is_map(meta) do
+  defp encode_metadata(meta) when is_map(meta) do
     meta
     |> encode_crash_reason()
     |> convert_mfa()
@@ -123,17 +124,17 @@ defmodule LogflareEx.LoggerBackend.Formatter do
 
   def encode_crash_reason(meta), do: meta
 
-  def convert_initial_call(%{initial_call: {m, f, a}} = meta) when is_integer(a) do
+  defp convert_initial_call(%{initial_call: {m, f, a}} = meta) when is_integer(a) do
     %{meta | initial_call: {m, f, "#{a}"}}
   end
 
-  def convert_initial_call(meta), do: meta
+  defp convert_initial_call(meta), do: meta
 
-  def convert_mfa(%{mfa: {m, f, a}} = meta) when is_integer(a) do
+  defp convert_mfa(%{mfa: {m, f, a}} = meta) when is_integer(a) do
     %{meta | mfa: {m, f, "#{a}"}}
   end
 
-  def convert_mfa(meta), do: meta
+  defp convert_mfa(meta), do: meta
 
   def traverse_convert(%NaiveDateTime{} = v), do: to_string(v)
   def traverse_convert(%DateTime{} = v), do: to_string(v)
@@ -143,7 +144,7 @@ defmodule LogflareEx.LoggerBackend.Formatter do
   end
 
   def traverse_convert(data) when is_map(data) do
-    for {k, v} <- data, into: Map.new() do
+    for {k, v} <- data, into: %{} do
       {traverse_convert(k), traverse_convert(v)}
     end
   end
@@ -153,7 +154,7 @@ defmodule LogflareEx.LoggerBackend.Formatter do
       value
       |> Enum.map(&type/1)
       |> Enum.uniq()
-      |> then(&(length(&1) == 1))
+      |> then(&match?([_], &1))
 
     cond do
       Keyword.keyword?(value) ->
@@ -161,7 +162,7 @@ defmodule LogflareEx.LoggerBackend.Formatter do
         |> Map.new()
         |> traverse_convert()
 
-      length(value) > 0 and List.ascii_printable?(value) ->
+      value != [] and List.ascii_printable?(value) ->
         to_string(value)
 
       single_type? ->
