@@ -305,6 +305,22 @@ defmodule LogflareEx.LoggerBackendTest do
 
       assert_receive :ok
     end
+
+    test "toplevel value is present at toplevel" do
+      pid = self()
+
+      Tesla
+      |> expect(:post, 1, fn _client, _path, body ->
+        batch = Bertex.decode(body)["batch"]
+        send(pid, {:ok, hd(batch)})
+        {:ok, %Tesla.Env{status: 201, body: Jason.encode!(%{"message" => "server msg"})}}
+      end)
+
+      log_data(:ok, "Hello There", foo: "General Kenobi")
+
+      assert_receive {:ok, msg}
+      assert %{"foo" => _} = msg
+    end
   end
 
   defp start_batcher_sup(_ctx) do
@@ -330,7 +346,11 @@ defmodule LogflareEx.LoggerBackendTest do
       {:ok, _pid} = Logger.add_backend(LoggerBackend)
 
       :ok =
-        Logger.configure_backend(LoggerBackend, source_token: "some-token", flush_interval: 50)
+        Logger.configure_backend(LoggerBackend,
+          source_token: "some-token",
+          flush_interval: 50,
+          toplevel: [:foo]
+        )
 
       Logger.put_module_level(__MODULE__, :all)
       Logger.flush()
@@ -348,9 +368,9 @@ defmodule LogflareEx.LoggerBackendTest do
     :ok
   end
 
-  defp log_data(data, text \\ "some event") do
+  defp log_data(data, text \\ "some event", meta \\ []) do
     capture_log(fn ->
-      Logger.info(text, data: data)
+      Logger.info(text, [{:data, data} | meta])
     end)
   end
 end

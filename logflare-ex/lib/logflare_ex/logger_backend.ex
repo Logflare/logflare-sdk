@@ -102,7 +102,7 @@ defmodule LogflareEx.LoggerBackend do
   def handle_event({level, _gl, {Logger, msg, datetime, metadata}}, config) do
     if log_level_matches?(level, config.level) do
       # TODO: add default context formatting for backwards compat
-      payload = Formatter.format(level, msg, datetime, metadata)
+      payload = Formatter.format(level, msg, datetime, metadata, config)
       LogflareEx.send_batched_event(config.client, payload)
     end
 
@@ -158,7 +158,7 @@ defmodule LogflareEx.LoggerBackend do
   defp log_level_matches?(lvl, min), do: Logger.compare_levels(lvl, min) != :lt
 
   defp build_default_config(options \\ []) do
-    config_file_opts = (Application.get_env(:logflare_ex, __MODULE__) || []) |> Map.new()
+    config_file_opts = Map.new(Application.get_env(:logflare_ex, __MODULE__) || [])
     opts = Enum.into(options, config_file_opts)
     client = LogflareEx.client(opts)
 
@@ -169,10 +169,10 @@ defmodule LogflareEx.LoggerBackend do
         nil
       end
 
-    options
-    |> Enum.into(%{
+    Enum.into(options, %{
       level: :all,
-      client: client
+      client: client,
+      toplevel: opts[:toplevel] || []
     })
   end
 end
