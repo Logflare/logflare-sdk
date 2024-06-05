@@ -66,7 +66,6 @@ defmodule LogflareExTest do
       end
     end
 
-
     test "triggers on_error mfa on tesla client error" do
       Tesla
       |> expect(:post, 2, fn _client, _path, _body ->
@@ -84,7 +83,6 @@ defmodule LogflareExTest do
         assert {:error, %Tesla.Env{}} = LogflareEx.send_events(client, [%{some: "event"}])
       end
     end
-
   end
 
   describe "batching" do
