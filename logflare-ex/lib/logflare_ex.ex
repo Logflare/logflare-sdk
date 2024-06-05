@@ -66,7 +66,7 @@ defmodule LogflareEx do
       {:ok, %Tesla.Env{status: status, body: body}} when status < 300 ->
         {:ok, Jason.decode!(body)}
 
-      {:error, %Tesla.Env{} = result} ->
+      {_result, %Tesla.Env{} = result} ->
         # on_error callback
         case Map.get(client, :on_error) do
           {m, f, 1} -> apply(m, f, [result])
