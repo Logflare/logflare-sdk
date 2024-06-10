@@ -5,11 +5,11 @@ on:
     branches:
       - main
     paths:
-      - logflare-js/**
+      - js/**
 
 defaults:
   run:
-    working-directory: ./logflare-js
+    working-directory: ./js
 
 jobs:
   build:
