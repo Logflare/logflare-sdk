@@ -1,18 +1,14 @@
-# LogflareSdk
+# Warehouse SDK
 
-Multi-language SDK for Logflare.
+Multi-language SDK for Supabase Warehouse (Logflare).
 
 Supported languages and integrations:
 
 - Javascript/Typescript
 - Elixir
+  - LoggerBackend - a backend for Logger
+  - TelemetryReporter - a telemetry reporter module for `:telemetry_metrics`
 
-## Elixir
-
-The Elixir SDK has the following features:
-
-- LoggerBackend - a Logger backend for Logger
-- TelemetryReporter - a telemetry reporter module for `:telemetry_metrics`
 
 ## Development
 
