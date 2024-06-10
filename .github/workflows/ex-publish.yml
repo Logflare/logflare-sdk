@@ -8,11 +8,11 @@ on:
     branches:
       - main
     paths:
-      - logflare-ex/**
+      - ex/**
 
 defaults:
   run:
-    working-directory: ./logflare-ex
+    working-directory: ./ex
 
 jobs:
   publish:
@@ -27,7 +27,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            logflare-ex/deps
+            ex/deps
           key: mix-${{ hashFiles('**/mix.lock') }}
           restore-keys: mix
       - run: mix deps.get
