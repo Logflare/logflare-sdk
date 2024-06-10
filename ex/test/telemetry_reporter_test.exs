@@ -52,6 +52,7 @@ defmodule LogflareEx.TelemetryReporterTest do
       refute event[:latency][:value]
       # include nested values
       assert event[:measurements][:latency][:nested] == 123
+      assert event[:message] =~ "latency=%{nested: 123}"
     end
 
     test "handle_attach/4 with no :include option" do
@@ -113,6 +114,7 @@ defmodule LogflareEx.TelemetryReporterTest do
 
       # no other fields will be included
       assert event[:event] == "some.event"
+      assert event[:message] =~ "latency=[123, 223]"
       refute event[:metadata]
       assert event[:measurements][:latency] == [123, 223]
       refute event[:measurements][:other]

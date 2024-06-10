@@ -76,9 +76,13 @@ defmodule LogflareEx.TelemetryReporter do
     event_str = Enum.map_join(event, ".", &Atom.to_string(&1))
 
     measurements_str =
-      Enum.map_join(measurements, " ", fn {k, v} ->
-        "#{inspect(k)}=#{inspect(v)}"
-      end)
+      if Map.get(filtered_payload, :measurements) do
+        Enum.map_join(filtered_payload.measurements, " ", fn {k, v} ->
+          "#{stringify(k)}=#{stringify(v)}"
+        end)
+      else
+        ""
+      end
 
     message = "#{event_str} | #{measurements_str}"
     client = LogflareEx.client(opts)
@@ -95,6 +99,17 @@ defmodule LogflareEx.TelemetryReporter do
     LogflareEx.send_batched_event(client, payload)
 
     :ok
+  end
+
+  defp stringify(v) do
+    case v do
+      v when is_float(v) -> Float.to_string(v)
+      v when is_integer(v) -> Integer.to_string(v)
+      v when is_atom(v) -> Atom.to_string(v)
+      v when is_binary(v) -> v
+      v when is_map(v) -> inspect(v)
+      other -> inspect(v)
+    end
   end
 
   # puts a value at a given dot path or atom list path
