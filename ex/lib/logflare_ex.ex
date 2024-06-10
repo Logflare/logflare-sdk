@@ -60,7 +60,22 @@ defmodule LogflareEx do
   def send_events(%Client{source_token: nil, source_name: nil}, _batch), do: {:error, :no_source}
 
   def send_events(client, [%{} | _] = batch) do
-    body = Bertex.encode(%{"batch" => batch, "source" => client.source_token})
+    on_prepare_payload = Map.get(client, :on_prepare_payload)
+
+    prepared_batch =
+      if on_prepare_payload do
+        Enum.map(batch, fn event ->
+          case on_prepare_payload do
+            {m, f, 1} -> apply(m, f, [event])
+            cb when is_function(cb) -> cb.(event)
+            _ -> event
+          end
+        end)
+      else
+        batch
+      end
+
+    body = Bertex.encode(%{"batch" => prepared_batch, "source" => client.source_token})
 
     case Tesla.post(client.tesla_client, "/api/logs", body) do
       {:ok, %Tesla.Env{status: status, body: body}} when status < 300 ->

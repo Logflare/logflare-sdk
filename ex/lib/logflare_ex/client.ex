@@ -41,6 +41,7 @@ defmodule LogflareEx.Client do
   - `:source_token`: Source UUID. Mutually exclusive with `:source_name`
   - `:source_name`: Source name. Mutually exclusive with `:source_token`
   - `:on_error`: mfa callback for handling API errors. Must be 1 arity.
+  - `:on_prepare_payload`: mfa callback or anonymous function for preparing the final payload before sending to API. Must be 1 arity.
   - `:auto_flush`: Used for batching. Enables automatic flushing. If disabled, `LogflareEx.flush/1` must be called.
   - `:flush_interval`: Used for batching. Flushes cached events at the provided interval.
   - `:batch_size`: Used for batching. It is the maximum number of events send per API request.
@@ -61,6 +62,7 @@ defmodule LogflareEx.Client do
     field(:source_token, String.t())
     field(:source_name, String.t())
     field(:on_error, list() | mfa(), default: nil)
+    field(:on_prepare_payload, list() | mfa(), default: nil)
     # batching
     field(:auto_flush, :boolean, default: true)
     field(:flush_interval, non_neg_integer(), default: @default_flush_interval)
@@ -79,6 +81,7 @@ defmodule LogflareEx.Client do
         source_name: get_config_value(:source_name),
         tesla_client: nil,
         on_error: get_config_value(:on_error),
+        on_prepare_payload: get_config_value(:on_prepare_payload),
         flush_interval: get_config_value(:flush_interval) || @default_flush_interval,
         batch_size: get_config_value(:batch_size) || @default_batch_size
       })
