@@ -108,7 +108,7 @@ defmodule LogflareEx.TelemetryReporter do
       v when is_atom(v) -> Atom.to_string(v)
       v when is_binary(v) -> v
       v when is_map(v) -> inspect(v)
-      other -> inspect(v)
+      _other -> inspect(v)
     end
   end
 
