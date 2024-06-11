@@ -9,7 +9,6 @@ Supported languages and integrations:
   - LoggerBackend - a backend for Logger
   - TelemetryReporter - a telemetry reporter module for `:telemetry_metrics`
 
-
 ## Development
 
 Release tags are prefixed with the language followed by the version, such as `js/v0.1.0`.

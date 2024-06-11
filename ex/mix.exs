@@ -1,6 +1,7 @@
 defmodule LogflareEx.MixProject do
   use Mix.Project
 
+  @source_url "https://github.com/Logflare/warehouse-sdk"
   @prerelease System.get_env("LOGFLARE_EX_PRERELEASE_VERSION")
   @version_suffix if(@prerelease, do: "-#{@prerelease}", else: "")
   def project do
@@ -15,6 +16,7 @@ defmodule LogflareEx.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       aliases: aliases(),
+      docs: docs(),
       preferred_cli_env: [
         "test.format": :test,
         "test.compile": :test
@@ -69,9 +71,22 @@ defmodule LogflareEx.MixProject do
 
   defp package() do
     [
-      description: "Logflare Elixir SDK",
+      description: "Warehouse Elixir SDK",
       licenses: ["MIT"],
-      links: %{"GitHub" => "https://github.com/Logflare/logflare-sdk"}
+      links: %{"GitHub" => @source_url}
     ]
   end
+
+  defp docs do
+    [
+      extras: [
+        "README.md": [title: "Overview"]
+      ],
+      main: "readme",
+      homepage_url: "https://hex.pm/packages/warehouse_ex",
+      source_url: @source_url,
+      formatters: ["html"]
+    ]
+  end
+
 end
