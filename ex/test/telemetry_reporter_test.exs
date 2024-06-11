@@ -17,9 +17,52 @@ defmodule LogflareEx.TelemetryReporterTest do
       end)
     end
 
-    test "handle_attach/4" do
+    test "handle_attach/4 with :include option" do
+      pid = self()
+      ref = make_ref()
+
       Tesla
-      |> expect(:post, fn _client, _path, _body ->
+      |> expect(:post, fn _client, _path, body ->
+        decoded = Bertex.decode(body)
+        send(pid, {ref, decoded})
+        {:ok, %Tesla.Env{status: 201, body: Jason.encode!(%{"message" => "server msg"})}}
+      end)
+
+      :telemetry.attach("my-id", [:some, :event], &TelemetryReporter.handle_attach/4,
+        auto_flush: true,
+        flush_interval: 50,
+        include: [
+          "measurements.latency",
+          "metadata.some"
+        ]
+      )
+
+      :telemetry.execute([:some, :event], %{latency: %{nested: 123}, value: 1235}, %{
+        some: "metadata",
+        to_exclude: "this field"
+      })
+
+      Process.sleep(300)
+      # should clear cache
+      assert LogflareEx.count_queued_events() == 0
+      assert_received {^ref, %{"batch" => [event]}}
+
+      # include option will only add
+      refute event[:metadata][:to_exclude]
+      refute event[:latency][:value]
+      # include nested values
+      assert event[:measurements][:latency][:nested] == 123
+      assert event[:message] =~ "latency=%{nested: 123}"
+    end
+
+    test "handle_attach/4 with no :include option" do
+      pid = self()
+      ref = make_ref()
+
+      Tesla
+      |> expect(:post, fn _client, _path, body ->
+        decoded = Bertex.decode(body)
+        send(pid, {ref, decoded})
         {:ok, %Tesla.Env{status: 201, body: Jason.encode!(%{"message" => "server msg"})}}
       end)
 
@@ -28,11 +71,53 @@ defmodule LogflareEx.TelemetryReporterTest do
         flush_interval: 50
       )
 
-      :telemetry.execute([:some, :event], %{latency: 123}, %{some: "metadata"})
+      :telemetry.execute([:some, :event], %{latency: 123, value: 1235}, %{
+        some: "metadata",
+        to_exclude: "this field"
+      })
 
       Process.sleep(300)
-      # should clear cache
-      assert LogflareEx.count_queued_events() == 0
+
+      assert_received {^ref, %{"batch" => [event]}}
+
+      # no other fields will be included
+      assert event[:event] == "some.event"
+      refute event[:metadata]
+      refute event[:measurements]
+    end
+
+    test "handle_attach/4 with nested list paths" do
+      pid = self()
+      ref = make_ref()
+
+      Tesla
+      |> expect(:post, fn _client, _path, body ->
+        decoded = Bertex.decode(body)
+        send(pid, {ref, decoded})
+        {:ok, %Tesla.Env{status: 201, body: Jason.encode!(%{"message" => "server msg"})}}
+      end)
+
+      :telemetry.attach("my-id", [:some, :event], &TelemetryReporter.handle_attach/4,
+        auto_flush: true,
+        flush_interval: 50,
+        include: ["measurements.latency"]
+      )
+
+      :telemetry.execute([:some, :event], %{latency: [123, 223], other: "value"}, %{
+        some: "metadata",
+        to_exclude: "this field"
+      })
+
+      Process.sleep(300)
+
+      assert_received {^ref, %{"batch" => [event]}}
+
+      # no other fields will be included
+      assert event[:event] == "some.event"
+      assert event[:message] =~ "latency=[123, 223]"
+      refute event[:metadata]
+      assert event[:measurements][:latency] == [123, 223]
+      refute event[:measurements][:other]
     end
   end
 
