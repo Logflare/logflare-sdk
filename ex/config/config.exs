@@ -17,7 +17,7 @@ import Config
 #       metadata: [:user_id]
 #
 
-config :logflare_ex,
+config :warehouse_ex,
   api_url: "https://api.logflare.app",
   api_key: "some-key"
 

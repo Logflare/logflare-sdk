@@ -1,4 +1,4 @@
-defmodule LogflareEx.TelemetryReporter do
+defmodule WarehouseEx.TelemetryReporter do
   @moduledoc """
   A TelemetryReporter for attaching to metrics created from `:telemetry_metrics`.
   Telemetry events are sent to the Logflare API as is.
@@ -15,26 +15,26 @@ defmodule LogflareEx.TelemetryReporter do
   end
   ```
 
-  Thereafter, add the `LogflareEx.TelemetryReporter` to your supervision tree:
+  Thereafter, add the `WarehouseEx.TelemetryReporter` to your supervision tree:
 
   ```elixir
     # application.ex
     children = [
-      {LogflareEx.TelemetryReporter, metrics: [
+      {WarehouseEx.TelemetryReporter, metrics: [
         last_value("some.event.stop.duration")
       ]}
     ]
     ...
   ```
 
-  The `LogflareEx.TelemetryReporter` will attach to all provided metrics.
+  The `WarehouseEx.TelemetryReporter` will attach to all provided metrics.
 
   ### Configuration
 
   There are 2 levels of configuration available, and these are listed in priority order:
 
-  1. Module level configuration via `config.exs`, such as `config :logflare_ex, #{__MODULE__}, source_token: ...`
-  2. Application level configuration via `config.exs`, such as`config :logflare_ex, source_token: ...`
+  1. Module level configuration via `config.exs`, such as `config :warehouse_ex, #{__MODULE__}, source_token: ...`
+  2. Application level configuration via `config.exs`, such as`config :warehouse_ex, source_token: ...`
 
   Client options will then be merged together, with each level overriding the previous.
 
@@ -48,7 +48,7 @@ defmodule LogflareEx.TelemetryReporter do
 
   @doc """
   `:telemetry.attach/4` callback for allowing attaching to telemetry events.
-  Telemetry events attached this way are batched to Logflare.
+  Telemetry events attached this way are batched to the server.
 
   Options:
   - `:include` - dot syntax fields to be included.
@@ -59,7 +59,7 @@ defmodule LogflareEx.TelemetryReporter do
 
   def handle_attach(event, measurements, metadata, config) when is_list(config) do
     # merge configuration
-    config_file_opts = (Application.get_env(:logflare_ex, __MODULE__) || []) |> Map.new()
+    config_file_opts = (Application.get_env(:warehouse_ex, __MODULE__) || []) |> Map.new()
 
     opts =
       Enum.into(config, config_file_opts)
@@ -87,7 +87,7 @@ defmodule LogflareEx.TelemetryReporter do
       end
 
     message = "#{event_str} | #{measurements_str}"
-    client = LogflareEx.client(opts)
+    client = WarehouseEx.client(opts)
 
     payload =
       Map.merge(
@@ -98,7 +98,7 @@ defmodule LogflareEx.TelemetryReporter do
         filtered_payload
       )
 
-    LogflareEx.send_batched_event(client, payload)
+    WarehouseEx.send_batched_event(client, payload)
 
     :ok
   end

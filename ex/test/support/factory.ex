@@ -1,7 +1,7 @@
-defmodule LogflareEx.Factory do
+defmodule WarehouseEx.Factory do
   # with Ecto
-  use ExMachina.Ecto, repo: LogflareEx.Repo
-  alias LogflareEx.BatchedEvent
+  use ExMachina.Ecto, repo: WarehouseEx.Repo
+  alias WarehouseEx.BatchedEvent
 
   def pending_event_factory(attrs) do
     %BatchedEvent{

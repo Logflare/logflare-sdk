@@ -1,30 +1,12 @@
-# LogflareEx
-
-**TODO: Add description**
+# WarehouseEx
 
 ## Installation
-
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `logflare_ex` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
   [
-    {:logflare_ex, "~> 0.1.0"}
+    {:warehouse_ex, "~> 0.2.0"}
   ]
-end
-```
-
-And add in to `application.ex`:
-```elixir
-  def start(_type, _args) do
-    children = [
-      {Finch, name: LogflareEx.Finch}
-    ]
-
-    opts = [strategy: :one_for_one, name: LogflareApiClient.Supervisor]
-    Supervisor.start_link(children, opts)
-  end
 end
 ```
 
@@ -62,8 +44,4 @@ bertex decode large        417.23 - 1.47x slower +0.77 ms
 jason encode large          57.26 - 10.73x slower +15.84 ms
 jason decode large          47.24 - 13.01x slower +19.54 ms
 ```
-
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/logflare_ex](https://hexdocs.pm/logflare_ex).
 

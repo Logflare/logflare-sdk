@@ -1,3 +1,3 @@
-defmodule LogflareEx.Repo do
-  use Ecto.Repo, otp_app: :logflare_ex, adapter: Etso.Adapter
+defmodule WarehouseEx.Repo do
+  use Ecto.Repo, otp_app: :warehouse_ex, adapter: Etso.Adapter
 end

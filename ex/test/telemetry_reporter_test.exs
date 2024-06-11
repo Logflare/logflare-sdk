@@ -1,19 +1,19 @@
-defmodule LogflareEx.TelemetryReporterTest do
-  use LogflareEx.BatcherCase
+defmodule WarehouseEx.TelemetryReporterTest do
+  use WarehouseEx.BatcherCase
   use Mimic
-  alias LogflareEx.BatcherSup
-  alias LogflareEx.TelemetryReporter
+  alias WarehouseEx.BatcherSup
+  alias WarehouseEx.TelemetryReporter
   import Telemetry.Metrics
 
   describe "telemtry" do
     setup do
       start_supervised!(BatcherSup)
-      source_name = Application.get_env(:logflare_ex, :source_name)
-      Application.put_env(:logflare_ex, :source_name, "some name")
+      source_name = Application.get_env(:warehouse_ex, :source_name)
+      Application.put_env(:warehouse_ex, :source_name, "some name")
 
       on_exit(fn ->
         :telemetry.detach("my-id")
-        Application.put_env(:logflare_ex, :source_name, source_name)
+        Application.put_env(:warehouse_ex, :source_name, source_name)
       end)
     end
 
@@ -44,7 +44,7 @@ defmodule LogflareEx.TelemetryReporterTest do
 
       Process.sleep(300)
       # should clear cache
-      assert LogflareEx.count_queued_events() == 0
+      assert WarehouseEx.count_queued_events() == 0
       assert_received {^ref, %{"batch" => [event]}}
 
       # include option will only add
@@ -193,11 +193,11 @@ defmodule LogflareEx.TelemetryReporterTest do
   describe "Configuration" do
     setup do
       start_supervised!(BatcherSup)
-      env = Application.get_env(:logflare_ex, TelemetryReporter)
-      Application.put_env(:logflare_ex, TelemetryReporter, api_url: "http://custom-url.com")
+      env = Application.get_env(:warehouse_ex, TelemetryReporter)
+      Application.put_env(:warehouse_ex, TelemetryReporter, api_url: "http://custom-url.com")
 
       on_exit(fn ->
-        Application.put_env(:logflare_ex, TelemetryReporter, env)
+        Application.put_env(:warehouse_ex, TelemetryReporter, env)
         :telemetry.detach("my-id")
       end)
 

@@ -1,4 +1,4 @@
-defmodule LogflareEx.LoggerBackend.Stacktrace do
+defmodule WarehouseEx.LoggerBackend.Stacktrace do
   @moduledoc """
   Handles stacktrace formatting for logged exceptions
   """

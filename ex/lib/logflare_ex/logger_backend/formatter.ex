@@ -1,6 +1,6 @@
-defmodule LogflareEx.LoggerBackend.Formatter do
+defmodule WarehouseEx.LoggerBackend.Formatter do
   @moduledoc false
-  alias LogflareEx.LoggerBackend.Stacktrace
+  alias WarehouseEx.LoggerBackend.Stacktrace
   require Logger
 
   def format(level, message, ts, metadata) do

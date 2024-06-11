@@ -1,34 +1,34 @@
-defmodule LogflareEx.Client do
+defmodule WarehouseEx.Client do
   @moduledoc """
-  A `LogflareEx.Client` contains all configuration used for making API requests, whether batched or not.
+  A `WarehouseEx.Client` contains all configuration used for making API requests, whether batched or not.
 
   ### Application-level Configuration
 
   Application-wide configuration can be set in `config.exs`:
 
   ```elixir
-  config :logflare_ex,
+  config :warehouse_ex,
     api_key: "...",
     source_token: "..."
   ```
 
   ### Runtime Configuration
 
-  All configuration options can be overridden at runtime. This is through the use of the `LogflareEx.Client` struct.
+  All configuration options can be overridden at runtime. This is through the use of the `WarehouseEx.Client` struct.
 
-  To create a new client with a custom configuration, use `LogflareEx.client/1`:
+  To create a new client with a custom configuration, use `WarehouseEx.client/1`:
 
   ```elixir
   # To create a client from the application-level configuration.
-  iex> default_client = LogflareEx.client()
-  %LogflareEx.Client{...}
+  iex> default_client = WarehouseEx.client()
+  %WarehouseEx.Client{...}
 
   # To create a client with runtime overrides
-  iex> client = LogflareEx.client(source_token: "...")
-  %LogflareEx.Client{...}
+  iex> client = WarehouseEx.client(source_token: "...")
+  %WarehouseEx.Client{...}
 
   # use the runtime client
-  iex> LogflareEx.send_batched_event(client, %{...})
+  iex> WarehouseEx.send_batched_event(client, %{...})
   :ok
   ```
 
@@ -37,17 +37,17 @@ defmodule LogflareEx.Client do
   For every configuration, either `:source_token` or `:source_name` must be provided.
 
   - `:api_key`: **Required**. Public API key.
-  - `:api_url`: Custom Logflare endpoint, for self-hosting. Defaults to `https//api.logflare.app`.
+  - `:api_url`: Custom server endpoint, for self-hosting. Defaults to `https//api.logflare.app`.
   - `:source_token`: Source UUID. Mutually exclusive with `:source_name`
   - `:source_name`: Source name. Mutually exclusive with `:source_token`
   - `:on_error`: mfa callback for handling API errors. Must be 1 arity.
   - `:on_prepare_payload`: mfa callback or anonymous function for preparing the final payload before sending to API. Must be 1 arity.
-  - `:auto_flush`: Used for batching. Enables automatic flushing. If disabled, `LogflareEx.flush/1` must be called.
+  - `:auto_flush`: Used for batching. Enables automatic flushing. If disabled, `WarehouseEx.flush/1` must be called.
   - `:flush_interval`: Used for batching. Flushes cached events at the provided interval.
   - `:batch_size`: Used for batching. It is the maximum number of events send per API request.
 
   """
-  @default_tesla_adapter {Tesla.Adapter.Finch, name: LogflareEx.Finch, receive_timeout: 30_000}
+  @default_tesla_adapter {Tesla.Adapter.Finch, name: WarehouseEx.Finch, receive_timeout: 30_000}
   @default_batch_size 250
   @default_flush_interval 1_500
 
@@ -116,7 +116,7 @@ defmodule LogflareEx.Client do
   end
 
   def get_config_value(key) do
-    Application.get_env(:logflare_ex, key)
+    Application.get_env(:warehouse_ex, key)
   end
 
   def validate_client(%__MODULE__{source_name: nil, source_token: nil}),

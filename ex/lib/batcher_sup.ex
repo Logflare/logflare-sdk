@@ -1,8 +1,8 @@
-defmodule LogflareEx.BatcherSup do
+defmodule WarehouseEx.BatcherSup do
   # Automatically defines child_spec/1
   use DynamicSupervisor
-  alias LogflareEx.Batcher
-  alias LogflareEx.Client
+  alias WarehouseEx.Batcher
+  alias WarehouseEx.Client
   require Logger
 
   def start_link(_init_arg) do

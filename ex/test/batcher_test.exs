@@ -1,9 +1,9 @@
-defmodule LogflareEx.BatcherTest do
-  use LogflareEx.BatcherCase
-  alias LogflareEx.Batcher
-  alias LogflareEx.BatcherSup
-  alias LogflareEx.BatchedEvent
-  alias LogflareEx.Client
+defmodule WarehouseEx.BatcherTest do
+  use WarehouseEx.BatcherCase
+  alias WarehouseEx.Batcher
+  alias WarehouseEx.BatcherSup
+  alias WarehouseEx.BatchedEvent
+  alias WarehouseEx.Client
   use Mimic
 
   describe "BatcherSup" do

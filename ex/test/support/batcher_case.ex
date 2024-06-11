@@ -1,11 +1,11 @@
-defmodule LogflareEx.BatcherCase do
+defmodule WarehouseEx.BatcherCase do
   use ExUnit.CaseTemplate, async: false
-  alias LogflareEx.Batcher
+  alias WarehouseEx.Batcher
 
   using do
     quote do
       use Mimic
-      import LogflareEx.Factory
+      import WarehouseEx.Factory
       setup :set_mimic_global
       setup :verify_on_exit!
     end

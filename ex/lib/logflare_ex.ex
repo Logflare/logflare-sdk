@@ -1,18 +1,18 @@
-defmodule LogflareEx do
-  alias LogflareEx.Client
-  alias LogflareEx.Batcher
-  alias LogflareEx.BatchedEvent
-  alias LogflareEx.Repo
-  alias LogflareEx.BatcherSup
+defmodule WarehouseEx do
+  alias WarehouseEx.Client
+  alias WarehouseEx.Batcher
+  alias WarehouseEx.BatchedEvent
+  alias WarehouseEx.Repo
+  alias WarehouseEx.BatcherSup
 
   @moduledoc """
-  Documentation for `LogflareEx`.
+  Documentation for `WarehouseEx`.
   """
 
   @doc """
   Creates a client for interacting with Logflare.
 
-  See `LogflareEx.Client`.
+  See `WarehouseEx.Client`.
   """
 
   defdelegate client(opts), to: __MODULE__.Client, as: :new
@@ -37,19 +37,19 @@ defmodule LogflareEx do
   ### Example
 
   ```elixir
-  iex> client = LogflareEx.client()
-  %LogflareEx.Client{...}
+  iex> client = WarehouseEx.client()
+  %WarehouseEx.Client{...}
 
   # singular event
-  iex> LogflareEx.send_event(client, %{my: "event"})
+  iex> WarehouseEx.send_event(client, %{my: "event"})
   {:ok, %{"message"=> "Logged!}}
 
   # multiple events
-  iex> LogflareEx.send_events(client, [%{my: "event"}, ...])
+  iex> WarehouseEx.send_events(client, [%{my: "event"}, ...])
   {:ok, %{"message"=> "Logged!}}
 
   # a tesla result will be returned on error
-  iex> client |> LogflareEx.send_event(%{my: "event"})
+  iex> client |> WarehouseEx.send_event(%{my: "event"})
   {:error, %Tesla.Env{...}}
 
   ```
@@ -110,15 +110,15 @@ defmodule LogflareEx do
 
   ```elixir
   # create a client
-  iex> client = LogflareEx.client()
-  %LogflareEx.Client{...}
+  iex> client = WarehouseEx.client()
+  %WarehouseEx.Client{...}
 
   # singular event
-  iex> LogflareEx.send_batched_event(client, %{...})
+  iex> WarehouseEx.send_batched_event(client, %{...})
   :ok
 
   # list of events
-  iex> LogflareEx.send_batched_event(client, [%{...}, ...])
+  iex> WarehouseEx.send_batched_event(client, [%{...}, ...])
   :ok
   ```
   """
