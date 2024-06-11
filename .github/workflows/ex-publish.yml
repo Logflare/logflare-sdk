@@ -33,7 +33,7 @@ jobs:
       - run: mix deps.get
       - run: echo "short_sha=`echo ${GITHUB_SHA} | cut -c1-7`" >> $GITHUB_ENV
       - run: echo "timestamp=`date +%s`" >> $GITHUB_ENV
-      - run: mix hex.publish --yes
+      - run: mix hex.publish package --yes
         if: github.event_name == 'push'
         env:
           HEX_API_KEY: ${{ secrets.HEX_AUTH_TOKEN }}

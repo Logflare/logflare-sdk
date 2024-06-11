@@ -85,7 +85,8 @@ defmodule LogflareEx.MixProject do
       main: "readme",
       homepage_url: "https://hex.pm/packages/warehouse_ex",
       source_url: @source_url,
-      formatters: ["html"]
+      formatters: ["html"],
+      filter_modules: ~r/.+\..+\..+$/
     ]
   end
 end
