@@ -60,14 +60,16 @@ defmodule LogflareEx.TelemetryReporter do
   def handle_attach(event, measurements, metadata, config) when is_list(config) do
     # merge configuration
     config_file_opts = (Application.get_env(:logflare_ex, __MODULE__) || []) |> Map.new()
-    opts = Enum.into(config, config_file_opts)
+
+    opts =
+      Enum.into(config, config_file_opts)
 
     payload = %{metadata: metadata, measurements: measurements}
     to_include = Map.get(opts, :include, [])
 
     filtered_payload =
       for path <- to_include,
-          String.starts_with?(path, "measurements.") or String.starts_with?(path, "metadata."),
+          String.starts_with?(path, "measurements") or String.starts_with?(path, "metadata"),
           reduce: %{} do
         acc -> put_path(acc, path, get_path(payload, path))
       end

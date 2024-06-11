@@ -119,6 +119,42 @@ defmodule LogflareEx.TelemetryReporterTest do
       assert event[:measurements][:latency] == [123, 223]
       refute event[:measurements][:other]
     end
+
+    test "handle_attach/4 with :on_prepare_payload with anonymous function" do
+      pid = self()
+      ref = make_ref()
+
+      Tesla
+      |> expect(:post, fn _client, _path, body ->
+        decoded = Bertex.decode(body)
+        send(pid, {ref, decoded})
+        {:ok, %Tesla.Env{status: 201, body: Jason.encode!(%{"message" => "server msg"})}}
+      end)
+
+      :telemetry.attach("my-id", [:some, :event], &TelemetryReporter.handle_attach/4,
+        auto_flush: true,
+        flush_interval: 50,
+        include: ["measurements"],
+        on_prepare_payload: fn payload ->
+          payload
+          |> Map.put(:message, "hello!")
+          |> Map.put(:test, payload.measurements.other)
+        end
+      )
+
+      :telemetry.execute([:some, :event], %{latency: [123, 223], other: "value"}, %{
+        some: "metadata",
+        to_exclude: "this field"
+      })
+
+      Process.sleep(300)
+
+      assert_received {^ref, %{"batch" => [event]}}
+      # other fields will be included
+      assert event[:message] == "hello!"
+      assert event[:test] == "value"
+      assert event[:measurements][:latency] == [123, 223]
+    end
   end
 
   # reporter

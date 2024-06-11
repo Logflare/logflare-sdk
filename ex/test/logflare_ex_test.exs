@@ -85,6 +85,38 @@ defmodule LogflareExTest do
     end
   end
 
+  describe "on_prepare_payload" do
+    test "triggered before payload is sent" do
+      pid = self()
+
+      Tesla
+      |> expect(:post, 3, fn _client, _path, body ->
+        %{"batch" => [event]} = Bertex.decode(body)
+        send(pid, {event.ref, event})
+        {:ok, %Tesla.Env{status: 500, body: "some server error"}}
+      end)
+
+      LogflareEx.TestUtils
+      |> expect(:stub_function, 2, fn data ->
+        %{different: "value", ref: data.ref}
+      end)
+
+      for cb <- [
+            {LogflareEx.TestUtils, :stub_function, 1},
+            &LogflareEx.TestUtils.stub_function/1,
+            fn data -> %{different: "value", ref: data.ref} end
+          ] do
+        client = LogflareEx.client(api_key: "123", source_token: "123", on_prepare_payload: cb)
+        ref = make_ref()
+
+        assert {:error, %Tesla.Env{}} =
+                 LogflareEx.send_events(client, [%{some: "event", ref: ref}])
+
+        assert_receive {^ref, %{different: "value", ref: _}}
+      end
+    end
+  end
+
   describe "batching" do
     setup do
       pid = start_supervised!(BatcherSup)
