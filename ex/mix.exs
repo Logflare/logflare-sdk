@@ -88,5 +88,4 @@ defmodule LogflareEx.MixProject do
       formatters: ["html"]
     ]
   end
-
 end
