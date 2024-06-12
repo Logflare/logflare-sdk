@@ -1,4 +1,4 @@
-defmodule LogflareExTest do
+defmodule WarehouseExTest do
   use WarehouseEx.BatcherCase
   use Mimic
   alias WarehouseEx.BatcherSup
@@ -96,21 +96,21 @@ defmodule LogflareExTest do
         {:ok, %Tesla.Env{status: 500, body: "some server error"}}
       end)
 
-      LogflareEx.TestUtils
+      WarehouseEx.TestUtils
       |> expect(:stub_function, 2, fn data ->
         %{different: "value", ref: data.ref}
       end)
 
       for cb <- [
-            {LogflareEx.TestUtils, :stub_function, 1},
-            &LogflareEx.TestUtils.stub_function/1,
+            {WarehouseEx.TestUtils, :stub_function, 1},
+            &WarehouseEx.TestUtils.stub_function/1,
             fn data -> %{different: "value", ref: data.ref} end
           ] do
-        client = LogflareEx.client(api_key: "123", source_token: "123", on_prepare_payload: cb)
+        client = WarehouseEx.client(api_key: "123", source_token: "123", on_prepare_payload: cb)
         ref = make_ref()
 
         assert {:error, %Tesla.Env{}} =
-                 LogflareEx.send_events(client, [%{some: "event", ref: ref}])
+                 WarehouseEx.send_events(client, [%{some: "event", ref: ref}])
 
         assert_receive {^ref, %{different: "value", ref: _}}
       end
