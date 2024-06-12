@@ -1,4 +1,4 @@
-defmodule LogflareEx.LoggerBackend do
+defmodule WarehouseEx.LoggerBackend do
   @moduledoc """
   Implements `:gen_event` behaviour, handles incoming Logger messages.
 
@@ -8,7 +8,7 @@ defmodule LogflareEx.LoggerBackend do
   Add the following to your config.exs:
   ```elixir
   config :logger
-    backends: [..., LogflareEx.LoggerBackend]
+    backends: [..., WarehouseEx.LoggerBackend]
   ```
   You can then log as per normal:
 
@@ -22,8 +22,8 @@ defmodule LogflareEx.LoggerBackend do
   There are 3 levels of configuration available, and these are listed in priority order:
 
   1. Runtime Logger configuration, such as  `Logger.configure(...)`
-  2. Module level configuration via `config.exs`, such as `config :logflare_ex, #{__MODULE__}, source_token: ...`
-  3. Application level configuration via `config.exs`, such as`config :logflare_ex, source_token: ...`
+  2. Module level configuration via `config.exs`, such as `config :warehouse_ex, #{__MODULE__}, source_token: ...`
+  3. Application level configuration via `config.exs`, such as`config :warehouse_ex, source_token: ...`
 
   Options will then be merged together, with each level overriding the previous.
 
@@ -67,7 +67,7 @@ defmodule LogflareEx.LoggerBackend do
   alias __MODULE__.Formatter
   require Logger
 
-  @app :logflare_ex
+  @app :warehouse_ex
   @behaviour :gen_event
 
   @type level :: Logger.level()
@@ -84,7 +84,7 @@ defmodule LogflareEx.LoggerBackend do
 
   @spec handle_event(log_msg, Config.t()) :: {:ok, Config.t()}
   def handle_event(:flush, config) do
-    LogflareEx.flush(config.client)
+    WarehouseEx.flush(config.client)
     {:ok, config}
   end
 
@@ -103,7 +103,7 @@ defmodule LogflareEx.LoggerBackend do
     if log_level_matches?(level, config.level) do
       # TODO: add default context formatting for backwards compat
       payload = Formatter.format(level, msg, datetime, metadata)
-      LogflareEx.send_batched_event(config.client, payload)
+      WarehouseEx.send_batched_event(config.client, payload)
     end
 
     {:ok, config}
@@ -115,7 +115,7 @@ defmodule LogflareEx.LoggerBackend do
   end
 
   def handle_info(:flush, state) do
-    LogflareEx.flush(state.client)
+    WarehouseEx.flush(state.client)
     {:ok, state}
   end
 
@@ -133,7 +133,7 @@ defmodule LogflareEx.LoggerBackend do
   def terminate(_reason, _state), do: :ok
 
   defp maybe_start(config) do
-    with :ok <- LogflareEx.Client.validate_client(config.client) do
+    with :ok <- WarehouseEx.Client.validate_client(config.client) do
       msg = "[#{__MODULE__}] v#{Application.spec(@app, :vsn)} started."
       log_after(:info, msg)
       :ok
@@ -146,7 +146,7 @@ defmodule LogflareEx.LoggerBackend do
 
   # delayed logging to ensure applications are started
   defp log_after(level, message, delay \\ 5_000) do
-    if Application.get_env(:logflare_ex, :env) != :test do
+    if Application.get_env(:warehouse_ex, :env) != :test do
       Process.send_after(self(), {:log_after, level, message}, delay)
     end
   end
@@ -158,12 +158,12 @@ defmodule LogflareEx.LoggerBackend do
   defp log_level_matches?(lvl, min), do: Logger.compare_levels(lvl, min) != :lt
 
   defp build_default_config(options \\ []) do
-    config_file_opts = (Application.get_env(:logflare_ex, __MODULE__) || []) |> Map.new()
+    config_file_opts = (Application.get_env(:warehouse_ex, __MODULE__) || []) |> Map.new()
     opts = Enum.into(options, config_file_opts)
-    client = LogflareEx.client(opts)
+    client = WarehouseEx.client(opts)
 
     client =
-      if :ok == LogflareEx.Client.validate_client(client) do
+      if :ok == WarehouseEx.Client.validate_client(client) do
         client
       else
         nil

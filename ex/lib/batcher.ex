@@ -1,6 +1,6 @@
-defmodule LogflareEx.Batcher do
+defmodule WarehouseEx.Batcher do
   @moduledoc """
-  Batching cache is an Etso repo, `LogflareEx.Repo`, and stores all events to be sent to the Logflare service.
+  Batching cache is an Etso repo, `WarehouseEx.Repo`, and stores all events to be sent to the Logflare service.
 
   There are 2 states that an event can be in:
   - pending
@@ -11,10 +11,10 @@ defmodule LogflareEx.Batcher do
   use GenServer
 
   import Ecto.Query
-  alias LogflareEx.BatchedEvent
-  alias LogflareEx.BatcherRegistry
-  alias LogflareEx.Client
-  alias LogflareEx.Repo
+  alias WarehouseEx.BatchedEvent
+  alias WarehouseEx.BatcherRegistry
+  alias WarehouseEx.Client
+  alias WarehouseEx.Repo
 
   # API
 
@@ -142,14 +142,14 @@ defmodule LogflareEx.Batcher do
   end
 
   @doc """
-  Returns the via for each partitioned Batcher. Accepts a `source_token` or `source_name` filter or a `%LogflareEx.Client{}` struct.
+  Returns the via for each partitioned Batcher. Accepts a `source_token` or `source_name` filter or a `%WarehouseEx.Client{}` struct.
 
   ### Example
 
   ```elixir
   via(source_name: "my source")
   via(source_token: "some-uuid")
-  via(%LogflareEx.Client{...})
+  via(%WarehouseEx.Client{...})
   ```
   """
   @spec via(Client.t() | kw_filter()) :: identifier()
@@ -222,7 +222,7 @@ defmodule LogflareEx.Batcher do
 
     # Task to send batch
     Task.start_link(fn ->
-      LogflareEx.send_events(state.client, batch)
+      WarehouseEx.send_events(state.client, batch)
       Repo.delete_all(from(e in BatchedEvent, where: e.id in ^event_ids))
     end)
 

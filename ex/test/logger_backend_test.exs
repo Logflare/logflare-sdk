@@ -1,9 +1,9 @@
-defmodule LogflareEx.LoggerBackendTest do
-  use LogflareEx.BatcherCase
+defmodule WarehouseEx.LoggerBackendTest do
+  use WarehouseEx.BatcherCase
   use Mimic
   setup :set_mimic_global
-  alias LogflareEx.BatcherSup
-  alias LogflareEx.LoggerBackend
+  alias WarehouseEx.BatcherSup
+  alias WarehouseEx.LoggerBackend
   require Logger
   import ExUnit.CaptureLog
   import ExUnit.CaptureIO
@@ -42,7 +42,7 @@ defmodule LogflareEx.LoggerBackendTest do
         {:ok, %Tesla.Env{status: 201, body: Jason.encode!(%{"message" => "server msg"})}}
       end)
 
-      assert LogflareEx.count_queued_events() == 0
+      assert WarehouseEx.count_queued_events() == 0
 
       capture_log(fn ->
         Logger.emergency("a log event")
@@ -58,10 +58,10 @@ defmodule LogflareEx.LoggerBackendTest do
         Process.sleep(80)
       end) =~ "a log event"
 
-      assert LogflareEx.count_queued_events() == 10
+      assert WarehouseEx.count_queued_events() == 10
       Process.sleep(300)
       # should clear cache
-      assert LogflareEx.count_queued_events() == 0
+      assert WarehouseEx.count_queued_events() == 0
     end
 
     test "exception and stacktrace" do
@@ -279,11 +279,11 @@ defmodule LogflareEx.LoggerBackendTest do
 
   describe "Configuration" do
     setup do
-      env = Application.get_env(:logflare_ex, LoggerBackend)
-      Application.put_env(:logflare_ex, LoggerBackend, api_url: "http://custom-url.com")
+      env = Application.get_env(:warehouse_ex, LoggerBackend)
+      Application.put_env(:warehouse_ex, LoggerBackend, api_url: "http://custom-url.com")
 
       on_exit(fn ->
-        Application.put_env(:logflare_ex, LoggerBackend, env)
+        Application.put_env(:warehouse_ex, LoggerBackend, env)
       end)
 
       :ok

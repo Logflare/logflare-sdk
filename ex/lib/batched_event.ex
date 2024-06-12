@@ -1,4 +1,4 @@
-defmodule LogflareEx.BatchedEvent do
+defmodule WarehouseEx.BatchedEvent do
   @moduledoc false
   use TypedEctoSchema
 

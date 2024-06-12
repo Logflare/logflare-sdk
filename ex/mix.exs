@@ -1,12 +1,12 @@
-defmodule LogflareEx.MixProject do
+defmodule WarehouseEx.MixProject do
   use Mix.Project
 
   @source_url "https://github.com/Logflare/warehouse-sdk"
-  @prerelease System.get_env("LOGFLARE_EX_PRERELEASE_VERSION")
+  @prerelease System.get_env("WAREHOUSE_EX_PRERELEASE_VERSION")
   @version_suffix if(@prerelease, do: "-#{@prerelease}", else: "")
   def project do
     [
-      app: :logflare_ex,
+      app: :warehouse_ex,
       version: "0.2.0#{@version_suffix}",
       build_path: "./_build",
       config_path: "./config/config.exs",
@@ -34,7 +34,7 @@ defmodule LogflareEx.MixProject do
   def application do
     [
       extra_applications: if(Mix.env() != :test, do: [:logger], else: [:logger, :runtime_tools]),
-      mod: {LogflareEx.Application, []}
+      mod: {WarehouseEx.Application, []}
     ]
   end
 

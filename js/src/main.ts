@@ -3,9 +3,9 @@ export interface ClientOptions {
   sourceToken: string;
   // api key retrieved from service
   apiKey: string;
-  // configurable url for the logflare endpoint
+  // configurable url for the server endpoint
   apiUrl?: string;
-  // onError is an optional callback function to handle any errors returned by logflare
+  // onError is an optional callback function to handle any errors returned by server
   onError?: (
     payload: {
       batch: object[];
