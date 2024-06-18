@@ -5,7 +5,7 @@ Multi-language SDK for Supabase Warehouse (Logflare).
 Supported languages and integrations:
 
 - Javascript/Typescript
-- Elixir
+- Elixir ([hex.pm](https://hex.pm/packages/warehouse_ex), [docs](https://hexdocs.pm/warehouse_ex/))
   - LoggerBackend - a backend for Logger
   - TelemetryReporter - a telemetry reporter module for `:telemetry_metrics`
 
